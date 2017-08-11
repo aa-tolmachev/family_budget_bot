@@ -11,14 +11,16 @@ application = Flask(__name__)  # Change assignment here
 
 
 
-@application.route("/")  # Change your route statements
+
+# тестовый вывод
+@application.route("/")  
 def hello():
     return "Hello World!"
 
 
 
 
-
+# тестовый запуск
 @application.route('/family_budget', methods=['GET', 'POST'])
 def app_fb():
     try:
@@ -30,6 +32,8 @@ def app_fb():
     except:
 
         return 'ERROR'
+
+
 
 
 
