@@ -2,6 +2,7 @@ from flask import Flask
 from flask import request
 from flask import make_response
 import os
+from telegram.ext import Updater
 
 
 import family_budget
@@ -39,5 +40,16 @@ def app_fb():
 
 if __name__ == "__main__":
     port = int(os.getenv('PORT', 5000))
+
+
+    TOKEN = "382244799:AAFfN3evzGDQaRevpW5xqZ1AEovvdRCWk-0"
+    PORT = int(os.environ.get('PORT', '5000'))
+    updater = Updater(TOKEN)
+    # add handlers
+    updater.start_webhook(listen="0.0.0.0",
+                          port=PORT,
+                          url_path=TOKEN)
+    updater.bot.set_webhook("https://family-budget-.herokuapp.com/382244799:AAFfN3evzGDQaRevpW5xqZ1AEovvdRCWk-0")
+    updater.idle()
     application.run(debug=False, port=port, host='0.0.0.0')
 
