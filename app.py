@@ -41,8 +41,8 @@ def hello():
 @application.route('/main', methods=['GET', 'POST'])
 def main():
     try:
-        json_params = json.loads(request.get_data())
-        json_str = str(json_params)
+        #json_params = json.loads(request.get_data())
+        #json_str = str(json_params)
         #family_budget.main()
 
         url = api + token + '/sendMessage'
