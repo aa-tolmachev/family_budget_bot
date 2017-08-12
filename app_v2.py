@@ -1,12 +1,14 @@
 import telebot
 import os
 from flask import Flask, request
+
 import access
 
 token = access.token()
-bot = telebot.TeleBot(token)
 
+bot = telebot.TeleBot(token)
 server = Flask(__name__)
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -15,6 +17,7 @@ def start(message):
 @bot.message_handler(func=lambda message: True, content_types=['text'])
 def echo_message(message):
     bot.reply_to(message, message.text)
+
 
 @server.route("/bot", methods=['POST'])
 def getMessage():
@@ -28,4 +31,3 @@ def webhook():
     return "!", 200
 
 server.run(host="0.0.0.0", port=os.environ.get('PORT', 5000))
-server = Flask(__name__)
