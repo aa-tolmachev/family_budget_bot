@@ -47,7 +47,7 @@ def main():
 
         url = api + token + '/sendMessage'
         params = {'chat_id' : 84723474
-                ,'text' : json_str
+                ,'text' : 'привет'
         }
         r = requests.post(url,
                           json=params)
