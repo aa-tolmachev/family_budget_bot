@@ -65,7 +65,7 @@ def main():
 
 if __name__ == "__main__":
     port = int(os.getenv('PORT', 5000))
-    port = 443
+    #port = 443
     application.run(debug=False, port=port, host='0.0.0.0')
 
 
