@@ -1,55 +1,29 @@
-from flask import Flask
-from flask import request
-from flask import make_response
+import telebot
 import os
-from telegram.ext import Updater
+from flask import Flask, request
 
+bot = telebot.TeleBot('<api_token>')
 
-import family_budget
+server = Flask(__name__)
 
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.reply_to(message, 'Hello, ' + message.from_user.first_name)
 
-application = Flask(__name__)  # Change assignment here
+@bot.message_handler(func=lambda message: True, content_types=['text'])
+def echo_message(message):
+    bot.reply_to(message, message.text)
 
+@server.route("/bot", methods=['POST'])
+def getMessage():
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    return "!", 200
 
+@server.route("/")
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url="https://family-budget-.herokuapp.com/bot")
+    return "!", 200
 
-
-# тестовый вывод
-@application.route("/")  
-def hello():
-    return "Hello World!"
-
-
-
-
-# тестовый запуск
-@application.route('/family_budget', methods=['GET', 'POST'])
-def app_fb():
-    try:
-        #json_params = json.loads(request.get_data())
-
-        family_budget.main()
-        
-        return 'END'
-    except:
-
-        return 'ERROR'
-
-
-
-
-
-if __name__ == "__main__":
-    port = int(os.getenv('PORT', 5000))
-
-
-    TOKEN = "382244799:AAFfN3evzGDQaRevpW5xqZ1AEovvdRCWk-0"
-    PORT = int(os.environ.get('PORT', '5000'))
-    updater = Updater(TOKEN)
-    # add handlers
-    updater.start_webhook(listen="0.0.0.0",
-                          port=PORT,
-                          url_path=TOKEN)
-    updater.bot.set_webhook("https://family-budget-.herokuapp.com/382244799:AAFfN3evzGDQaRevpW5xqZ1AEovvdRCWk-0")
-    updater.idle()
-    application.run(debug=False, port=port, host='0.0.0.0')
-
+server.run(host="0.0.0.0", port=os.environ.get('PORT', 5000))
+server = Flask(__name__)
