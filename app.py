@@ -1,29 +1,60 @@
-import telebot
+from flask import Flask
+from flask import request
+from flask import make_response
 import os
-from flask import Flask, request
+import telebot
 
-bot = telebot.TeleBot('<api_token>')
 
-server = Flask(__name__)
+import family_budget
+import access
 
-@bot.message_handler(commands=['start'])
-def start(message):
-    bot.reply_to(message, 'Hello, ' + message.from_user.first_name)
 
-@bot.message_handler(func=lambda message: True, content_types=['text'])
-def echo_message(message):
-    bot.reply_to(message, message.text)
+token = access.token()
+bot = telebot.TeleBot(token)
 
-@server.route("/bot", methods=['POST'])
-def getMessage():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return "!", 200
+application = Flask(__name__)  # Change assignment here
 
-@server.route("/")
+# создаем webhook
+@application.route("/set_webhook")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url="https://family-budget-.herokuapp.com/bot")
+    bot.set_webhook(url="https://family-budget-.herokuapp.com/family_budget")
     return "!", 200
 
-server.run(host="0.0.0.0", port=os.environ.get('PORT', 5000))
-server = Flask(__name__)
+
+
+
+# тестовый вывод
+@application.route("/")  
+def hello():
+    return "Hello World!"
+
+
+
+
+# тестовый запуск
+@application.route('/family_budget', methods=['GET', 'POST'])
+def app_fb():
+    try:
+        #json_params = json.loads(request.get_data())
+
+        family_budget.main()
+        
+        return 'END'
+    except:
+
+        return 'ERROR'
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    port = int(os.getenv('PORT', 5000))
+
+
+
+    application.run(debug=False, port=port, host='0.0.0.0')
+
