@@ -17,7 +17,6 @@ application = Flask(__name__)  # Change assignment here
 # создаем webhook
 @application.route("/set_webhook")
 def webhook():
-    bot.remove_webhook()
     bot.set_webhook(url="https://family-budget-.herokuapp.com/family_budget")
     return "!", 200
 
@@ -53,8 +52,5 @@ def app_fb():
 
 if __name__ == "__main__":
     port = int(os.getenv('PORT', 5000))
-
-
-
     application.run(debug=False, port=port, host='0.0.0.0')
 
