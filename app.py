@@ -69,6 +69,3 @@ if __name__ == "__main__":
 
 
 
-#telepot
-#python-telegram-bot
-#telebot
