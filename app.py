@@ -2,7 +2,7 @@ from flask import Flask
 from flask import request
 from flask import make_response
 import os
-import telebot
+#import telebot
 
 
 import family_budget
@@ -10,14 +10,19 @@ import access
 
 
 token = access.token()
-bot = telebot.TeleBot(token)
+api = access.api()
+#bot = telebot.TeleBot(token)
 
 application = Flask(__name__)  # Change assignment here
 
 # создаем webhook
 @application.route("/set_webhook")
 def webhook():
-    bot.set_webhook(url="https://family-budget-.herokuapp.com/family_budget")
+    url = api + token + '/setWebhook'
+        params = {'url' : 'https://fam-budg-bot.herokuapp.com/main'
+        }
+        r = requests.post(url,
+                          json=params)
     return "!", 200
 
 
@@ -32,8 +37,8 @@ def hello():
 
 
 # тестовый запуск
-@application.route('/family_budget', methods=['GET', 'POST'])
-def app_fb():
+@application.route('/main', methods=['GET', 'POST'])
+def main():
     try:
         #json_params = json.loads(request.get_data())
 
