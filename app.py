@@ -41,14 +41,21 @@ def hello():
 @application.route('/main', methods=['GET', 'POST'])
 def main():
     try:
-        #json_params = json.loads(request.get_data())
+        json_params = json.loads(request.get_data())
+        json_str = str(json_params)
+        #family_budget.main()
 
-        family_budget.main()
-        
-        return 'END'
+        url = api + token + '/sendMessage'
+        params = {'chat_id' : 84723474
+                ,'text' : json_str
+        }
+        r = requests.post(url,
+                          json=params)
+            
+        return "!", 200
     except:
 
-        return 'ERROR'
+        return "!", 200
 
 
 
