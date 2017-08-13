@@ -59,7 +59,7 @@ def main():
 
         #в зависимости от команды выбираем действие
         command = json_update['message']['text']
-        if command[0] != '/'
+        if command[0] != '/':
             text = 'Неизвестная команда, для списка команд выбирите команду /help'
             #! переделать в функцию
             url = api + token + '/sendMessage'
