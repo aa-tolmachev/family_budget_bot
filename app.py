@@ -4,19 +4,24 @@ import requests
 from flask import make_response
 import os
 import json
+from pandas import DataFrame
 
 
-import family_budget
-import access
+from methods import access
 from methods.emoji import emoji
+from methods import telegram_bot_methods
+from methods import google_maps_methods
+from methods import psql_methods
+
+
 
 
 token = access.token()
 api = access.api()
+
 #bot = telebot.TeleBot(token)
 
 application = Flask(__name__)  # Change assignment here
-
 
 
 
@@ -67,18 +72,26 @@ def main():
 
         #в зависимости от команды выбираем действие
         if command[0] != '/':
-            text = 'Неизвестная команда, для списка команд выбирите команду /help'
+            text = 'Не понимаю... Помочь? /help'
 
         else:
             if 'start' in command:
+                r = psql_methods.new_user(chat_id)
                 text = emoji('фанфары') + 'Добрый день! \n' 
-                text += 'Я планирую домашнего бюджета и напоминаю об операциях в течение месяца. \n'
+                text += 'Я планирую домашний бюджет и напоминаю об операциях в течение месяца. \n'
                 text += 'Я развиваюсь в свободное время, текущие команды можно увидеть в меню /help. \n'
                 text += 'Либо сразу заведите свой кошелек и забудьте о том, чтобы держать бюджет семьи в голове!' + emoji('банкноты')
             elif 'help' in command:
-                text = 'Раздел разрабатывается, тут всё понятно, заводи кошелек и стартуем!'
+                r = psql_methods.last_state(chat_id,command)
+                text = 'Раздел разрабатывается, тут всё понятно, заводи кошелек /make_wallet и стартуем!'
+            elif 'make_wallet' in command:
+                r = psql_methods.last_state(chat_id,command)
+                text = 'Раздел разрабатывается..........' + emoji('руки_аминь') + emoji('руки_аминь') + emoji('руки_аминь') + emoji('руки_аминь')  
+
+
+
             else:
-                text = 'Не понимаю...'
+                text = 'Неизвестная команда, для списка команд выбирите команду /help'
   
 
         #! переделать в функцию
