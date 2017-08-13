@@ -1,4 +1,5 @@
 httplib2
+pandas
 dj-database-url==0.4.1
 Flask==0.12
 Django==1.11
