@@ -8,6 +8,7 @@ import json
 
 import family_budget
 import access
+from methods.emoji import emoji
 
 
 token = access.token()
@@ -15,6 +16,10 @@ api = access.api()
 #bot = telebot.TeleBot(token)
 
 application = Flask(__name__)  # Change assignment here
+
+
+
+
 
 # создаем webhook
 @application.route("/set_webhook")
@@ -25,7 +30,6 @@ def webhook():
     r = requests.post(url,
                       json=params)
     return "!", 200
-
 
 
 
@@ -43,15 +47,18 @@ def main():
     try:
         json_update = json.loads(request.get_data())
         #Тестовый блок, при получении сообщения пробрасываем json обратно, чтобы посмотреть, что получаем
-        json_str = str(json_params)
+        #json_str = str(json_update)
         
 
-        url = api + token + '/sendMessage'
-        params = {'chat_id' : 84723474
-                ,'text' : json_str
-        }
-        r = requests.post(url,
-                          json=params)
+        #url = api + token + '/sendMessage'
+        #params = {'chat_id' : 84723474
+        #        ,'text' : json_update
+        #}
+        #r = requests.post(url,
+        #                  json=params)
+
+
+
 
 
         #получаем id чата и текст сообщения
@@ -63,10 +70,15 @@ def main():
             text = 'Неизвестная команда, для списка команд выбирите команду /help'
 
         else:
-            if 'help' in command:
-                text = 'раздел разрабатывается'
+            if 'start' in command:
+                text = emoji('фанфары') + 'Добрый день! \n' 
+                text += 'Я планирую домашнего бюджета и напоминаю об операциях в течение месяца. \n'
+                text += 'Я развиваюсь в свободное время, текущие команды можно увидеть в меню /help. \n'
+                text += 'Либо сразу заведите свой кошелек и забудьте о том, чтобы держать бюджет семьи в голове!' + emoji('банкноты')
+            elif 'help' in command:
+                text = 'Раздел разрабатывается, тут всё понятно, заводи кошелек и стартуем!'
             else:
-                text = 'такой команды мне не знакомо...'
+                text = 'Не понимаю...'
   
 
         #! переделать в функцию
