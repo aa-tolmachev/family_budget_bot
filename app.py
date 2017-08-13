@@ -54,26 +54,28 @@ def main():
                           json=params)
 
 
-        #получаем id чата
+        #получаем id чата и текст сообщения
         chat_id = json_update['message']['chat']['id']
+        command = json_update['message']['text']
 
         #в зависимости от команды выбираем действие
-        command = json_update['message']['text']
         if command[0] != '/':
             text = 'Неизвестная команда, для списка команд выбирите команду /help'
-            #! переделать в функцию
-            url = api + token + '/sendMessage'
-            params = {'chat_id' : chat_id
-                    ,'text' : text
-            }
-            r = requests.post(url,
-                              json=params)
+
         else:
             if 'help' in command:
-                'раздел разрабатывается'
-            
+                text = 'раздел разрабатывается'
+            else:
+                text = 'такой команды мне не знакомо...'
+  
 
-
+        #! переделать в функцию
+        url = api + token + '/sendMessage'
+        params = {'chat_id' : chat_id
+                ,'text' : text
+        }
+        r = requests.post(url,
+                          json=params)
 
         #family_budget.main()
             
