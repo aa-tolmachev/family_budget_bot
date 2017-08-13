@@ -37,13 +37,14 @@ def hello():
 
 
 
-# тестовый запуск
+# запуск основной функции
 @application.route('/main', methods=['GET', 'POST'])
 def main():
     try:
-        json_params = json.loads(request.get_data())
+        json_update = json.loads(request.get_data())
+        #Тестовый блок, при получении сообщения пробрасываем json обратно, чтобы посмотреть, что получаем
         json_str = str(json_params)
-        #family_budget.main()
+        
 
         url = api + token + '/sendMessage'
         params = {'chat_id' : 84723474
@@ -51,6 +52,30 @@ def main():
         }
         r = requests.post(url,
                           json=params)
+
+
+        #получаем id чата
+        chat_id = json_update['message']['chat']['id']
+
+        #в зависимости от команды выбираем действие
+        command = json_update['message']['text']
+        if command[0] != '/'
+            text = 'Неизвестная команда, для списка команд выбирите команду /help'
+            #! переделать в функцию
+            url = api + token + '/sendMessage'
+            params = {'chat_id' : chat_id
+                    ,'text' : text
+            }
+            r = requests.post(url,
+                              json=params)
+        else:
+            if 'help' in command:
+                'раздел разрабатывается'
+            
+
+
+
+        #family_budget.main()
             
         return "!", 200
     except:
@@ -67,8 +92,3 @@ if __name__ == "__main__":
     port = int(os.getenv('PORT', 5000))
     application.run(debug=False, port=port, host='0.0.0.0')
 
-
-
-#telepot
-#python-telegram-bot
-#telebot
