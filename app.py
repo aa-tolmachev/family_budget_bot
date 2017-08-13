@@ -3,7 +3,7 @@ from flask import request
 import requests
 from flask import make_response
 import os
-#import telebot
+import json
 
 
 import family_budget
@@ -20,7 +20,7 @@ application = Flask(__name__)  # Change assignment here
 @application.route("/set_webhook")
 def webhook():
     url = api + token + '/setWebhook'
-    params = {'url' : 'https://fam-budg-bot.herokuapp.com/main'
+    params = {'url' : 'https://fin-budg-bot.herokuapp.com/main'
     }
     r = requests.post(url,
                       json=params)
@@ -41,13 +41,13 @@ def hello():
 @application.route('/main', methods=['GET', 'POST'])
 def main():
     try:
-        #json_params = json.loads(request.get_data())
-        #json_str = str(json_params)
+        json_params = json.loads(request.get_data())
+        json_str = str(json_params)
         #family_budget.main()
 
         url = api + token + '/sendMessage'
         params = {'chat_id' : 84723474
-                ,'text' : 'привет'
+                ,'text' : json_str
         }
         r = requests.post(url,
                           json=params)
