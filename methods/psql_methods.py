@@ -23,7 +23,7 @@ def new_user(chat_id = None , json_update = None):
     # создаем запрос
     cur = conn.cursor()
     #проверяем, что пользователя ранее не было
-    cur.execute("SELECT * from public.state where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
+    cur.execute("SELECT * from public.user where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
     #если записи не было - создаем
     if cur.statusmessage[-3:] == 'T 0':
         #создаем запись в строчке последнего шага
