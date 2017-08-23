@@ -44,20 +44,27 @@ def new_user(chat_id = None , json_update = None):
 
 
 #регистрируем нового пользователя
-def last_state(chat_id = None , state = None):
+def last_state(chat_id = None , state = None ):
     # создаем запрос
     cur = conn.cursor()
     #проверяем, что пользователя ранее не было
     cur.execute("SELECT * from public.state where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
+    #получаем время записи
+    now = datetime.now()
+    message_at = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.hour)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
     #если запись есть - записываем состояние
     if cur.statusmessage[-3:] == 'T 1':
         #обновляем запись в строчке последнего шага
         cur.execute("UPDATE public.state  SET current_state = '%(state)s' WHERE chat_id  = %(chat_id)s" % {'state' : state, 'chat_id' : chat_id}  )
         conn.commit()
+        cur.execute("UPDATE public.user  SET last_message_at = '%(message_at)s' WHERE chat_id  = %(chat_id)s" % {'message_at' : message_at, 'chat_id' : chat_id}  )
+        conn.commit()
     #если записи не было - создаем
     elif cur.statusmessage[-3:] == 'T 0':
         #создаем запись в строчке последнего шага
         cur.execute("INSERT INTO public.state  VALUES (%(chat_id)s, '%(state)s')" % {'chat_id' : chat_id , 'state' : state} )
+        conn.commit()
+        cur.execute("UPDATE public.user  SET last_message_at = '%(message_at)s' WHERE chat_id  = %(chat_id)s" % {'message_at' : message_at, 'chat_id' : chat_id}  )
         conn.commit()
     cur.close()
 
