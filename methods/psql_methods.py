@@ -19,7 +19,7 @@ conn = psycopg2.connect("dbname='%(dbname)s' port='%(port)s' user='%(user)s' hos
 
 
 #регистрируем нового пользователя
-def new_user(chat_id = None):
+def new_user(chat_id = None , json_update = None):
     # создаем запрос
     cur = conn.cursor()
     #проверяем, что пользователя ранее не было
@@ -28,6 +28,15 @@ def new_user(chat_id = None):
     if cur.statusmessage[-3:] == 'T 0':
         #создаем запись в строчке последнего шага
         cur.execute("INSERT INTO public.state  VALUES (%(chat_id)s, '/start')" % {'chat_id' : chat_id} )
+        conn.commit()
+
+        #регистрируем пользователя
+        first_name = json_update['message']['chat']['first_name']
+        last_name = json_update['message']['chat']['last_name']
+        now = datetime.now()
+        created_at = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.hour)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
+        last_message_at = created_at
+        cur.execute("INSERT INTO public.user (chat_id,first_name,last_name,created_at,last_message_at)  VALUES (%(chat_id)s, '%(first_name)s','%(last_name)s','%(created_at)s','%(last_message_at)s)'" % {'chat_id' : chat_id , 'first_name' : first_name , 'last_name' : last_name , 'created_at' : created_at , 'last_message_at' : last_message_at} )
         conn.commit()
     cur.close()
 

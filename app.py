@@ -76,7 +76,7 @@ def main():
 
         else:
             if 'start' in command:
-                r = psql_methods.new_user(chat_id)
+                r = psql_methods.new_user(chat_id , json_update)
                 text = emoji('фанфары') + 'Добрый день! \n' 
                 text += 'Я планирую домашний бюджет и напоминаю об операциях в течение месяца. \n'
                 text += 'Я развиваюсь в свободное время, текущие команды можно увидеть в меню /help. \n'
