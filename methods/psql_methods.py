@@ -53,7 +53,7 @@ def last_state(chat_id = None , state = None ):
     now = datetime.now()
     message_at = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.hour)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
     #если запись есть - записываем состояние
-    if cur.statusmessage[-3:] == 'T 1':
+    if cur.statusmessage[-3:] != 'T 0':
         #обновляем запись в строчке последнего шага
         cur.execute("UPDATE public.state  SET current_state = '%(state)s' WHERE chat_id  = %(chat_id)s" % {'state' : state, 'chat_id' : chat_id}  )
         conn.commit()
