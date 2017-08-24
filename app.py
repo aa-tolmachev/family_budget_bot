@@ -86,23 +86,25 @@ def main():
                 text = 'Раздел разрабатывается, тут всё понятно, заводи кошелек /make_wallet и стартуем!'
             elif 'make_wallet' in command:
                 r = psql_methods.last_state(chat_id,command)
-                text = 'Раздел разрабатывается..........' + emoji('руки_аминь') + emoji('руки_аминь') + emoji('руки_аминь') + emoji('руки_аминь')  
+                r = psql_methods.make_wallet(chat_id)
+                text = r['text']
+            elif 'wallet_action' in command:
+                r = psql_methods.last_state(chat_id,command)
+                text = 'Что нужно сделать с личным кошельком? \n'
+                text += '/transaction_fact_add - добавить фактическую операцию'
+
 
 
 
             else:
                 text = 'Неизвестная команда, для списка команд выбирите команду /help'
   
+        #отправляем сообщение
+        send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text)
 
-        #! переделать в функцию
-        url = api + token + '/sendMessage'
-        params = {'chat_id' : chat_id
-                ,'text' : text
-        }
-        r = requests.post(url,
-                          json=params)
 
-        #family_budget.main()
+
+
             
         return "!", 200
     except:

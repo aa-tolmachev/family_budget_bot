@@ -1,9 +1,11 @@
 import requests
 import access
+import emoji
 import json
 from datetime import datetime
 from time import sleep
 import psycopg2
+from pandas import DataFrame
 
 
 token = access.token()
@@ -16,6 +18,11 @@ conn = psycopg2.connect("dbname='%(dbname)s' port='%(port)s' user='%(user)s' hos
 
 
 
+#текущая метка времени
+def now_str():
+    now = datetime.now()
+    now_str = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.hour)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
+    return now_str
 
 
 #регистрируем нового пользователя
@@ -43,7 +50,7 @@ def new_user(chat_id = None , json_update = None):
     return '200'
 
 
-#регистрируем нового пользователя
+#последний шаг пользователя
 def last_state(chat_id = None , state = None ):
     # создаем запрос
     cur = conn.cursor()
@@ -70,4 +77,42 @@ def last_state(chat_id = None , state = None ):
 
     return '200'
 
-  
+#создание кошелька
+def make_wallet(chat_id = None  ):
+    # создаем запрос
+    cur = conn.cursor()
+    #достаем информацию по пользователю
+    cur.execute("SELECT * from public.user where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
+    df = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+    #если по пользователю нет данных - просьба зарегистрироваться
+    if df.shape[0] == 0:
+        text = 'Сначала зарегистрируйтесь, иначе я не могу... /start'
+        status = 200
+    #если есть данные
+    else:
+        #если уже есть кошелек
+        if df['personal_wallet_id'][0] is not None:
+            text = 'У Вас уже есть кошелек, хотите его использовать? /wallet_action'
+            status = 200
+        #если нет кошелька создаем
+        else:
+            now = now_str()
+            cur.execute("INSERT INTO public.wallet (balance,created_at,last_transaction_at) VALUES (0,'%(now_f)s','%(now_s)s')" % {'now_f' : now , 'now_s' : now}  )
+            conn.commit()
+            cur.execute("SELECT MAX(id) as id from public.wallet")
+            df = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+            wallet_id = df['id'][0]
+            cur.execute("UPDATE public.user  SET personal_wallet_id = '%(wallet_id)s' WHERE chat_id  = %(chat_id)s" % {'wallet_id' : wallet_id, 'chat_id' : chat_id}  )
+            conn.commit()
+
+            text = emoji('банк') + 'Круто, личный кошелек создан! можем его использовать! /wallet_action' + emoji('смайл_спокойствие')
+            status = 200
+
+    cur.close()
+
+    response = {'status' : status
+                ,'text' : text
+                }
+
+    return response
+

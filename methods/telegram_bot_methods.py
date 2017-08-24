@@ -46,6 +46,10 @@ def send_message(chat_id = None , text = '/help -> список возможны
     r = requests.post(url,
                       json=params)
 
+    send_result = '200'
+
+    return send_result
+
 
 #функция отправки локации
 def send_location(chat_id = None , longitude = None , latitude = None):
@@ -59,5 +63,9 @@ def send_location(chat_id = None , longitude = None , latitude = None):
         }
         r = requests.post(url,
                           json=params)
+
+    send_result = '200'
+    
+    return send_result
 
 
