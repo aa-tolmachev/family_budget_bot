@@ -1,6 +1,6 @@
 import requests
 import access
-import emoji
+from methods.emoji import emoji
 import json
 from datetime import datetime
 from time import sleep
