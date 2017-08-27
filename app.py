@@ -51,20 +51,10 @@ def hello():
 def main():
     try:
         json_update = json.loads(request.get_data())
-        #Тестовый блок, при получении сообщения пробрасываем json обратно, чтобы посмотреть, что получаем
-        #json_str = str(json_update)
-        
-
-        #url = api + token + '/sendMessage'
-        #params = {'chat_id' : 84723474
-        #        ,'text' : json_update
-        #}
-        #r = requests.post(url,
-        #                  json=params)
 
 
-
-
+        #Изначально для отправки кнопки пустые
+        reply_markup = None
 
         #получаем id чата и текст сообщения
         chat_id = json_update['message']['chat']['id']
@@ -81,17 +71,25 @@ def main():
                 text += 'Я планирую домашний бюджет и напоминаю об операциях в течение месяца. \n'
                 text += 'Я развиваюсь в свободное время, текущие команды можно увидеть в меню /help. \n'
                 text += 'Либо сразу заведите свой кошелек и забудьте о том, чтобы держать бюджет семьи в голове!' + emoji('банкноты')
+                reply_markup = {'keyboard': [['/help'],['/make_wallet']], 'resize_keyboard': True, 'one_time_keyboard': True}
             elif 'help' in command:
                 r = psql_methods.last_state(chat_id,command)
-                text = 'Раздел разрабатывается, тут всё понятно, заводи кошелек /make_wallet и стартуем!'
+                text = 'Привет!' +  emoji('фанфары') + '\n'
+                text += 'Задачи кошелька:' + '\n'
+                text += '/make_wallet - создание кошелька'
+                text += '/expense_add - добавить трату'
+                text += '/expense_update - изменить/удалить трату'
+                text += '/wallet_report - отчет по операциям'
+                text += '/wallet_advice - совет'
             elif 'make_wallet' in command:
                 r = psql_methods.last_state(chat_id,command)
                 r = psql_methods.make_wallet(chat_id)
                 text = r['text']
+                reply_markup = r['reply_markup']
             elif 'wallet_action' in command:
                 r = psql_methods.last_state(chat_id,command)
                 text = 'Что нужно сделать с личным кошельком? \n'
-                text += '/transaction_fact_add - добавить фактическую операцию'
+                text += '/expense_add - добавить фактическую операцию'
 
 
 
@@ -100,7 +98,7 @@ def main():
                 text = 'Неизвестная команда, для списка команд выбирите команду /help'
   
         #отправляем сообщение
-        send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text)
+        send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup)
 
 
 

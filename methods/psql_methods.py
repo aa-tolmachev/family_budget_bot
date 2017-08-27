@@ -92,7 +92,7 @@ def make_wallet(chat_id = None  ):
     else:
         #если уже есть кошелек
         if df['personal_wallet_id'][0] is not None:
-            text = 'У Вас уже есть кошелек, хотите его использовать? /wallet_action'
+            text = 'У Вас уже есть кошелек, хотите его использовать?'
             status = 200
         #если нет кошелька создаем
         else:
@@ -105,13 +105,15 @@ def make_wallet(chat_id = None  ):
             cur.execute("UPDATE public.user  SET personal_wallet_id = '%(wallet_id)s' WHERE chat_id  = %(chat_id)s" % {'wallet_id' : wallet_id, 'chat_id' : chat_id}  )
             conn.commit()
 
-            text = emoji('банк') + 'Круто, личный кошелек создан! можем его использовать! /wallet_action' + emoji('смайл_спокойствие')
+            text = emoji('банк') + 'Круто, личный кошелек создан! можем его использовать!' + emoji('смайл_спокойствие')
             status = 200
 
     cur.close()
 
+    reply_markup = {'keyboard': [['/wallet_action']], 'resize_keyboard': True, 'one_time_keyboard': True}
     response = {'status' : status
                 ,'text' : text
+                ,'reply_markup' : reply_markup
                 }
 
     return response

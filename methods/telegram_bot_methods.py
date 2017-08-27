@@ -38,11 +38,20 @@ def get_message():
 
 
 #функция отправки одного сообщения
-def send_message(chat_id = None , text = '/help -> список возможных команд'):
+def send_message(chat_id = None , text = '/help -> список возможных команд' , reply_markup = None):
     url = api + token + '/sendMessage'
-    params = {'chat_id' : chat_id
-            ,'text' : text
-    }
+    
+    #если не направляем кнопки
+    if reply_markup is None:
+        params = {'chat_id' : chat_id
+                ,'text' : text
+        }
+    #если хотим отправить кнопки
+    else:
+        params = {'chat_id' : chat_id
+        ,'text' : text
+        ,'reply_markup': reply_markup
+        }
     r = requests.post(url,
                       json=params)
 
