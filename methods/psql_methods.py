@@ -158,7 +158,7 @@ def current_last_state(chat_id = None ):
     cur.close()
 
     response = {'last_state' : last_state
-                ,'status' : 
+                ,'status' : status
                 }
 
 

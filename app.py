@@ -103,6 +103,7 @@ def main():
             elif command in keyboard_expense and last_state == '/expense_add':
                 text = 'ок! Введите сумму операции'
                 r = psql_methods.insert_state_info_1(chat_id = chat_id , state_info_one = command)
+                #продолжить отсюда
 
 
 
