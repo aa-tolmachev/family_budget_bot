@@ -12,6 +12,7 @@ from methods.emoji import emoji
 from methods import telegram_bot_methods
 from methods import google_maps_methods
 from methods import psql_methods
+from methods import reply
 
 
 
@@ -65,13 +66,15 @@ def main():
             text = 'Не понимаю... Помочь? /help'
 
         else:
+            keyboard_expense = reply.keyboard_expense()
+            last_state = psql_methods.current_last_state(chat_id)
             if 'start' in command:
                 r = psql_methods.new_user(chat_id , json_update)
                 text = emoji('фанфары') + 'Добрый день! \n' 
                 text += 'Я планирую домашний бюджет и напоминаю об операциях в течение месяца. \n'
                 text += 'Я развиваюсь в свободное время, текущие команды можно увидеть в меню /help. \n'
                 text += 'Либо сразу заведите свой кошелек и забудьте о том, чтобы держать бюджет семьи в голове!' + emoji('банкноты')
-                reply_markup = {'keyboard': [['/help'],['/make_wallet']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                reply_markup = {'keyboard': [['/help'],['/make_wallet']], 'resize_keyboard': True, 'one_time_keyboard': False}
             elif 'help' in command:
                 r = psql_methods.last_state(chat_id,command)
                 text = 'Привет!' +  emoji('фанфары') + '\n'
@@ -90,6 +93,22 @@ def main():
                 r = psql_methods.last_state(chat_id,command)
                 text = 'Что нужно сделать с личным кошельком? \n'
                 text += '/expense_add - добавить фактическую операцию'
+                reply_markup = {'keyboard': [['/expense_add']], 'resize_keyboard': True, 'one_time_keyboard': False}
+            elif 'expense_add' in command:
+                r = psql_methods.last_state(chat_id,command)
+                text = 'Выберите тип траты'
+                keyboard_expense = reply.keyboard_expense()
+                reply_markup = {'keyboard': keyboard_expense, 'resize_keyboard': True, 'one_time_keyboard': True}
+            #если пришел запрос на добавление траты по типу - спрашиваем сумму
+            elif command in keyboard_expense and last_state == '/expense_add':
+                text = 'ок! Введите сумму операции'
+                r = psql_methods.insert_state_info_1(chat_id = chat_id , state_info_one = command)
+
+
+
+
+
+
 
 
 
