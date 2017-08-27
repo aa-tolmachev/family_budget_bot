@@ -110,7 +110,7 @@ def make_wallet(chat_id = None  ):
 
     cur.close()
 
-    reply_markup = {'keyboard': [['/wallet_action']], 'resize_keyboard': True, 'one_time_keyboard': True}
+    reply_markup = {'keyboard': [['/wallet_action']], 'resize_keyboard': True, 'one_time_keyboard': False}
     response = {'status' : status
                 ,'text' : text
                 ,'reply_markup' : reply_markup

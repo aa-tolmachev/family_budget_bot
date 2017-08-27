@@ -75,11 +75,11 @@ def main():
             elif 'help' in command:
                 r = psql_methods.last_state(chat_id,command)
                 text = 'Привет!' +  emoji('фанфары') + '\n'
-                text += 'Задачи кошелька:' + '\n'
-                text += '/make_wallet - создание кошелька'
-                text += '/expense_add - добавить трату'
-                text += '/expense_update - изменить/удалить трату'
-                text += '/wallet_report - отчет по операциям'
+                text += 'Задачи кошелька: \n'
+                text += '/make_wallet - создание кошелька \n'
+                text += '/expense_add - добавить трату \n'
+                text += '/expense_update - изменить/удалить трату \n'
+                text += '/wallet_report - отчет по операциям \n'
                 text += '/wallet_advice - совет'
             elif 'make_wallet' in command:
                 r = psql_methods.last_state(chat_id,command)
