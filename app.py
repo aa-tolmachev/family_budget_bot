@@ -61,13 +61,13 @@ def main():
         chat_id = json_update['message']['chat']['id']
         command = json_update['message']['text']
 
+        #получаем список трат
+        keyboard_expense = reply.list_expense_types()
+
         #в зависимости от команды выбираем действие
         if command[0] != '/':
             text = 'Не понимаю... Помочь? /help'
-
         else:
-            keyboard_expense = reply.keyboard_expense()
-            last_state = psql_methods.current_last_state(chat_id)
             if 'start' in command:
                 r = psql_methods.new_user(chat_id , json_update)
                 text = emoji('фанфары') + 'Добрый день! \n' 
@@ -97,16 +97,15 @@ def main():
             elif 'expense_add' in command:
                 r = psql_methods.last_state(chat_id,command)
                 text = 'Выберите тип траты'
-                keyboard_expense = reply.keyboard_expense()
                 reply_markup = {'keyboard': keyboard_expense, 'resize_keyboard': True, 'one_time_keyboard': True}
+           
             #если пришел запрос на добавление траты по типу - спрашиваем сумму
-            elif command in keyboard_expense and last_state == '/expense_add':
-                text = 'ок! Введите сумму операции'
-                r = psql_methods.insert_state_info_1(chat_id = chat_id , state_info_one = command)
-                #продолжить отсюда
-
-
-
+            elif command in keyboard_expense:
+                last_state = psql_methods.current_last_state(chat_id)
+                if command in keyboard_expense and last_state == '/expense_add':
+                    text = 'ок! Введите сумму операции'
+                    r = psql_methods.insert_state_info_1(chat_id = chat_id , state_info_one = command)
+                    #продолжить отсюда
 
 
 
