@@ -8,6 +8,7 @@ from pandas import DataFrame
 
 
 from methods import access
+from methods import crypto
 from methods.emoji import emoji
 from methods import telegram_bot_methods
 from methods import google_maps_methods
@@ -57,7 +58,7 @@ def main():
         #Изначально для отправки кнопки пустые
         reply_markup = None
         #главное меню
-        reply_markup_main = {'keyboard': [['/expense_add']], 'resize_keyboard': True, 'one_time_keyboard': False}
+        reply_markup_main = {'keyboard': [['/expense_add'],['/crypto ETH-USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
         #получаем id чата и текст сообщения
         chat_id = json_update['message']['chat']['id']
@@ -130,10 +131,18 @@ def main():
                         r = psql_methods.last_state(chat_id,'/main')
 
                         reply_markup = reply_markup_main
-
                 except:
                     text = 'Введите цифрами...'
                     reply_markup = None
+
+
+        #здесь добавить отчеты
+        #здесь запосы к криптовалютам
+        elif 'crypto ETH-USD' in command:
+            ETH_USD = crypto.crypto_curse()
+            text = str(ETH_USD) + ' $ за дозу эфирчика...'
+            reply_markup = reply_markup_main
+
 
 
 
