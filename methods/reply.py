@@ -20,4 +20,4 @@ def list_expense_types():
         elif i == list_expense_types[-1]:
             keyboard_expense.append(row_keyboard)
 
-    return keyboard_expense
+    return keyboard_expense , list_expense_types

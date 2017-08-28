@@ -56,66 +56,90 @@ def main():
 
         #Изначально для отправки кнопки пустые
         reply_markup = None
+        #главное меню
+        reply_markup_main = {'keyboard': [['/expense_add']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
         #получаем id чата и текст сообщения
         chat_id = json_update['message']['chat']['id']
         command = json_update['message']['text']
 
         #получаем список трат
-        keyboard_expense = reply.list_expense_types()
+        keyboard_expense , list_expense_types = reply.list_expense_types()
+
+        #получаем текущее состояние
+        dict_user_data = psql_methods.user_data(chat_id)
+        last_state = dict_user_data['last_state']
+        state_info_1 = dict_user_data['state_info_1']
+        user_id = dict_user_data['user_id']
+        personal_wallet_id = dict_user_data['personal_wallet_id']
+
 
         #в зависимости от команды выбираем действие
-        if command[0] != '/':
-            text = 'Не понимаю... Помочь? /help'
+        if 'start' in command:
+            r = psql_methods.new_user(chat_id , json_update)
+            text = emoji('фанфары') + 'Добрый день! \n' 
+            text += 'Я планирую домашний бюджет и напоминаю об операциях в течение месяца. \n'
+            text += 'Я развиваюсь в свободное время, текущие команды можно увидеть в меню /help. \n'
+            text += 'Либо сразу заведите свой кошелек и забудьте о том, чтобы держать бюджет семьи в голове!' + emoji('банкноты')
+            reply_markup = {'keyboard': [['/help'],['/make_wallet']], 'resize_keyboard': True, 'one_time_keyboard': False}
+        elif 'help' in command:
+            r = psql_methods.last_state(chat_id,command)
+            text = 'Привет!' +  emoji('фанфары') + '\n'
+            text += 'Задачи кошелька: \n'
+            text += '/make_wallet - создание кошелька \n'
+            text += '/expense_add - добавить трату \n'
+            text += '/expense_update - изменить/удалить трату \n'
+            text += '/wallet_report - отчет по операциям \n'
+            text += '/wallet_advice - совет'
+            reply_markup = None
+        elif 'make_wallet' in command:
+            r = psql_methods.last_state(chat_id,command)
+            r = psql_methods.make_wallet(chat_id)
+            text = r['text']
+            reply_markup = r['reply_markup']
+        elif 'wallet_action' in command:
+            r = psql_methods.last_state(chat_id,command)
+            text = 'Что нужно сделать с личным кошельком? \n'
+            text += '/expense_add - добавить фактическую операцию'
+            reply_markup = {'keyboard': [['/expense_add']], 'resize_keyboard': True, 'one_time_keyboard': False}
+        elif 'expense_add' in command:
+            r = psql_methods.last_state(chat_id,command)
+            text = 'Выберите тип траты'
+            reply_markup = {'keyboard': keyboard_expense, 'resize_keyboard': True, 'one_time_keyboard': True}
+       
+        #если пришел запрос на добавление траты по типу - спрашиваем сумму
+        elif last_state == '/expense_add':
+            if command in list_expense_types:
+                r = psql_methods.insert_state_info_1(chat_id = chat_id , state_info_one = command)
+                text = 'ОК! Введите сумму операции'
+                reply_markup = None
+            if state_info_1 in list_expense_types:
+                command = command.replace(',','.')
+                try:
+                    summa = round(float(command),2)
+                    r = psql_methods.add_transaction_fact(chat_id = chat_id , summa = summa , dict_user_data = dict_user_data)
+                    if r == 200:
+                        text = 'Операция добавлена!'
+                        r = psql_methods.clear_state(chat_id = chat_id)
+                        r = psql_methods.last_state(chat_id,'/main')
+
+                        reply_markup = reply_markup_main
+                    if r == 400:
+                        text = 'Ведутся какие-то работы... Повторите позже...'
+                        r = psql_methods.clear_state(chat_id = chat_id)
+                        r = psql_methods.last_state(chat_id,'/main')
+
+                        reply_markup = reply_markup_main
+
+                except:
+                    text = 'Введите цифрами...'
+                    reply_markup = None
+
+
+
         else:
-            if 'start' in command:
-                r = psql_methods.new_user(chat_id , json_update)
-                text = emoji('фанфары') + 'Добрый день! \n' 
-                text += 'Я планирую домашний бюджет и напоминаю об операциях в течение месяца. \n'
-                text += 'Я развиваюсь в свободное время, текущие команды можно увидеть в меню /help. \n'
-                text += 'Либо сразу заведите свой кошелек и забудьте о том, чтобы держать бюджет семьи в голове!' + emoji('банкноты')
-                reply_markup = {'keyboard': [['/help'],['/make_wallet']], 'resize_keyboard': True, 'one_time_keyboard': False}
-            elif 'help' in command:
-                r = psql_methods.last_state(chat_id,command)
-                text = 'Привет!' +  emoji('фанфары') + '\n'
-                text += 'Задачи кошелька: \n'
-                text += '/make_wallet - создание кошелька \n'
-                text += '/expense_add - добавить трату \n'
-                text += '/expense_update - изменить/удалить трату \n'
-                text += '/wallet_report - отчет по операциям \n'
-                text += '/wallet_advice - совет'
-            elif 'make_wallet' in command:
-                r = psql_methods.last_state(chat_id,command)
-                r = psql_methods.make_wallet(chat_id)
-                text = r['text']
-                reply_markup = r['reply_markup']
-            elif 'wallet_action' in command:
-                r = psql_methods.last_state(chat_id,command)
-                text = 'Что нужно сделать с личным кошельком? \n'
-                text += '/expense_add - добавить фактическую операцию'
-                reply_markup = {'keyboard': [['/expense_add']], 'resize_keyboard': True, 'one_time_keyboard': False}
-            elif 'expense_add' in command:
-                r = psql_methods.last_state(chat_id,command)
-                text = 'Выберите тип траты'
-                reply_markup = {'keyboard': keyboard_expense, 'resize_keyboard': True, 'one_time_keyboard': True}
-           
-            #если пришел запрос на добавление траты по типу - спрашиваем сумму
-            elif command in keyboard_expense:
-                last_state = psql_methods.current_last_state(chat_id)
-                if command in keyboard_expense and last_state == '/expense_add':
-                    text = 'ок! Введите сумму операции'
-                    r = psql_methods.insert_state_info_1(chat_id = chat_id , state_info_one = command)
-                    #продолжить отсюда
+            text = 'Неизвестная команда, для списка команд выбирите команду /help'
 
-
-
-
-
-
-
-            else:
-                text = 'Неизвестная команда, для списка команд выбирите команду /help'
-  
         #отправляем сообщение
         send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup)
 

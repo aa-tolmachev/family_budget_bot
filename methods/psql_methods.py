@@ -139,27 +139,84 @@ def insert_state_info_1(chat_id = None , state_info_one = None ):
 
     return '200'
 
-#запись информация state_info_1
-def current_last_state(chat_id = None ):
+
+def add_transaction_fact(chat_id = None , summa = None , dict_user_data = None):
+    #проверяем корректность данных
+    if 'float' not in str(type(summa)):
+        return 400
+    else:
+        state_info_1 = dict_user_data['state_info_1']
+        user_id = dict_user_data['user_id']
+        personal_wallet_id = dict_user_data['personal_wallet_id']
+        # создаем запрос
+        cur = conn.cursor()
+        #получаем время записи
+        now = now_str()
+        cur.execute("INSERT INTO public.transaction_fact (user_id,wallet_id,transaction_type,summa,date_fact) VALUES (%(user_id)s,%(wallet_id)s,'%(transaction_type)s' , %(summa)s , '%(date_fact)s')" % {'user_id' : user_id , 'wallet_id' : personal_wallet_id , 'transaction_type' : state_info_1 , 'summa' : summa , 'date_fact' : now}  )
+        conn.commit()
+        cur.close()
+
+        return 200
+
+
+def clear_state(chat_id = None ):
+
+
+    # создаем запрос
+    cur = conn.cursor()
+    cur.execute("update public.state set state_info_1 = null , state_info_2 = null , state_info_3 = null where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
+    conn.commit()
+    cur.close()
+
+    return 200
+
+
+
+
+#получение всей информации по пользователю
+def user_data(chat_id = None ):
     # создаем запрос
     cur = conn.cursor()
     #проверяем, что пользователя ранее не было
-    cur.execute("SELECT current_state from public.state where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
+    cur.execute("SELECT current_state , state_info_1 , state_info_2 , state_info_3 from public.state where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
 
     df = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
 
+    cur.execute("SELECT id , personal_wallet_id from public.user where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
+
+    df_user = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+
+
     if df.shape[0] != 0:
-        last_state = df['id'][0]
+        last_state = df['current_state'][0]
+        state_info_1 = df['state_info_1'][0]
+        state_info_2 = df['state_info_2'][0]
+        state_info_3 = df['state_info_3'][0]
+        user_id = df_user['id'][0]
+        personal_wallet_id = df_user['personal_wallet_id'][0]
         status = 200
     else:
         last_state = 'unknown'
+        state_info_1 = 'unknown'
+        state_info_2 = 'unknown'
+        state_info_3 = 'unknown'
+        user_id = 'unknown'
+        personal_wallet_id = 'unknown'
         status = 404
 
     cur.close()
 
     response = {'last_state' : last_state
+                ,'state_info_1' : state_info_1
+                ,'state_info_2' : state_info_2
+                ,'state_info_3' : state_info_3
+                ,'user_id' : user_id
+                ,'personal_wallet_id' : personal_wallet_id
                 ,'status' : status
                 }
 
 
     return response
+
+
