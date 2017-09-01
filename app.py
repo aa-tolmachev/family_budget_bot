@@ -58,7 +58,7 @@ def main():
         #Изначально для отправки кнопки пустые
         reply_markup = None
         #главное меню
-        reply_markup_main = {'keyboard': [['/expense_add'],['/crypto ETH-USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
+        reply_markup_main = {'keyboard': [['/expense_add'],['/crypto_ETH-USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
         #получаем id чата и текст сообщения
         chat_id = json_update['message']['chat']['id']
@@ -79,7 +79,7 @@ def main():
         if 'start' in command:
             r = psql_methods.new_user(chat_id , json_update)
             text = emoji('фанфары') + 'Добрый день! \n' 
-            text += 'Я планирую домашний бюджет и напоминаю об операциях в течение месяца. \n'
+            text += 'Я веду домашний бюджет и напоминаю об операциях в течение месяца. \n'
             text += 'Я развиваюсь в свободное время, текущие команды можно увидеть в меню /help. \n'
             text += 'Либо сразу заведите свой кошелек и забудьте о том, чтобы держать бюджет семьи в голове!' + emoji('банкноты')
             reply_markup = {'keyboard': [['/help'],['/make_wallet']], 'resize_keyboard': True, 'one_time_keyboard': False}
@@ -97,12 +97,13 @@ def main():
             r = psql_methods.last_state(chat_id,command)
             r = psql_methods.make_wallet(chat_id)
             text = r['text']
-            reply_markup = r['reply_markup']
+            #reply_markup = r['reply_markup']
+            reply_markup = reply_markup_main
         elif 'wallet_action' in command:
             r = psql_methods.last_state(chat_id,command)
             text = 'Что нужно сделать с личным кошельком? \n'
             text += '/expense_add - добавить фактическую операцию'
-            reply_markup = {'keyboard': [['/expense_add']], 'resize_keyboard': True, 'one_time_keyboard': False}
+            reply_markup = {'keyboard': [['/expense_add'],['/main']], 'resize_keyboard': True, 'one_time_keyboard': False}
         elif 'expense_add' in command:
             r = psql_methods.last_state(chat_id,command)
             text = 'Выберите тип траты'
@@ -136,9 +137,20 @@ def main():
                     reply_markup = None
 
 
-        #здесь добавить отчеты
+        #отчеты по кошельку
+        elif last_state == '/report':
+            r = psql_methods.last_state(chat_id,command)
+            
+
+
+        #возвращение в главное меню
+        elif last_state == '/main':
+            r = psql_methods.last_state(chat_id,command)
+            r = psql_methods.clear_state(chat_id = chat_id)
+            text = 'Что хотим сделать?'
+            reply_markup = reply_markup_main
         #здесь запосы к криптовалютам
-        elif 'crypto ETH-USD' in command:
+        elif 'crypto_ETH-USD' in command:
             ETH_USD = crypto.crypto_curse()
             text = str(ETH_USD) + ' $ за дозу эфирчика...'
             reply_markup = reply_markup_main
