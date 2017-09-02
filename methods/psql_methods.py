@@ -3,10 +3,11 @@ import access
 from methods.emoji import emoji
 import json
 from datetime import datetime
+from datetime import timedelta
 from time import sleep
 import psycopg2
 from pandas import DataFrame
-
+import pandas as pd
 
 token = access.token()
 api = access.api()
@@ -21,7 +22,7 @@ conn = psycopg2.connect("dbname='%(dbname)s' port='%(port)s' user='%(user)s' hos
 #текущая метка времени
 def now_str():
     now = datetime.now()
-    now_str = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.hour)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
+    now_str = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.day)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
     return now_str
 
 
@@ -41,7 +42,7 @@ def new_user(chat_id = None , json_update = None):
         first_name = json_update['message']['chat']['first_name']
         last_name = json_update['message']['chat']['last_name']
         now = datetime.now()
-        created_at = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.hour)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
+        created_at = now_str()
         last_message_at = created_at
         cur.execute("INSERT INTO public.user (chat_id,first_name,last_name,created_at,last_message_at)  VALUES (%(chat_id)s, '%(first_name)s','%(last_name)s','%(created_at)s','%(last_message_at)s')" % {'chat_id' : chat_id , 'first_name' : first_name , 'last_name' : last_name , 'created_at' : created_at , 'last_message_at' : last_message_at} )
         conn.commit()
@@ -58,7 +59,7 @@ def last_state(chat_id = None , state = None ):
     cur.execute("SELECT * from public.state where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
     #получаем время записи
     now = datetime.now()
-    message_at = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.hour)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
+    message_at = now_str()
     #если запись есть - записываем состояние
     if cur.statusmessage[-3:] != 'T 0':
         #обновляем запись в строчке последнего шага
@@ -126,7 +127,7 @@ def insert_state_info_1(chat_id = None , state_info_one = None ):
     cur.execute("SELECT * from public.state where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
     #получаем время записи
     now = datetime.now()
-    message_at = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.hour)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
+    message_at = now_str()
     #если запись есть - записываем состояние
     if cur.statusmessage[-3:] != 'T 0':
         #обновляем запись в строчке последнего шага
@@ -214,6 +215,59 @@ def user_data(chat_id = None ):
                 ,'user_id' : user_id
                 ,'personal_wallet_id' : personal_wallet_id
                 ,'status' : status
+                }
+
+
+    return response
+
+#отчет о тратах в предыдущем месяце
+def report_prev_expense(chat_id = None , user_id = None):
+    # создаем запрос
+    cur = conn.cursor()
+    #проверяем, что пользователя ранее не было
+    cur.execute("SELECT * from public.transaction_fact where user_id = %(user_id)s" % {'user_id' : user_id} )
+
+    df = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    cur.close()
+
+    #получаем необходимые даты
+    cur_year = datetime.now().year
+    cur_month = datetime.now().month
+
+    prev_year = cur_year if cur_month > 1 else cur_year -1
+    prev_month = cur_month - 1 if cur_month > 1 else 12
+
+    next_year = cur_year if cur_month < 12 else cur_year + 1
+    next_month = cur_month + 1 if cur_month < 12 else 1
+
+    #получаем df за текущий и предыдущий месяцы
+    df_cur_month_expense = df[(df.date_fact >= pd.datetime(cur_year,cur_month,1)) & (df.date_fact < pd.datetime(next_year,next_month,1))][:] 
+    df_prev_month_expense = df[(df.date_fact >= pd.datetime(prev_year,prev_month,1)) & (df.date_fact < pd.datetime(cur_year,cur_month,1))][:] 
+
+    #отсортированные и сгрупированные траты в текущем и предыдущем месяце
+    df_cur_month_expense_group = DataFrame(data = df_cur_month_expense.groupby(['transaction_type'])['summa'].sum() ).sort_values(by='summa' , ascending=False)
+    df_prev_month_expense_group = DataFrame(data = df_prev_month_expense.groupby(['transaction_type'])['summa'].sum() ).sort_values(by='summa' , ascending=False)
+
+
+    #заводм справочник популярных трат
+    type_expand = ([])
+    for row in df_prev_month_expense_group.iterrows():
+        k  = 1
+        type_expand.append(row[0])
+
+    sum_expand = df_prev_month_expense_group.values.astype(float)
+    all_sum = df_prev_month_expense_group['summa'].values.astype(float).sum()
+       
+    text = 'Ваши траты в прошлом месяце: \n' 
+    for type , sum in zip(type_expand , sum_expand):
+        text += type + ': ' + str(int(round(sum[0],0)))  + ' руб.\n'
+        
+    text += '\nИтого на сумму ' + str(int(round(all_sum,0))) + ' руб.\n'
+
+
+    response = {'text' : text
+                ,'status' : 200
                 }
 
 

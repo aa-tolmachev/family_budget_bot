@@ -58,7 +58,7 @@ def main():
         #Изначально для отправки кнопки пустые
         reply_markup = None
         #главное меню
-        reply_markup_main = {'keyboard': [['/expense_add'],['/crypto_ETH-USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
+        reply_markup_main = {'keyboard': [['/expense_add'],['/report'],['/crypto_ETH_USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
         #получаем id чата и текст сообщения
         chat_id = json_update['message']['chat']['id']
@@ -138,19 +138,24 @@ def main():
 
 
         #отчеты по кошельку
-        elif last_state == '/report':
+        elif 'report' in command:
             r = psql_methods.last_state(chat_id,command)
-            
+            r = psql_methods.report_prev_expense(chat_id = chat_id , user_id = user_id)
+            text = r['text']
+            reply_markup = reply_markup_main
+
+
 
 
         #возвращение в главное меню
-        elif last_state == '/main':
+        elif 'main' in command:
             r = psql_methods.last_state(chat_id,command)
             r = psql_methods.clear_state(chat_id = chat_id)
             text = 'Что хотим сделать?'
             reply_markup = reply_markup_main
+
         #здесь запосы к криптовалютам
-        elif 'crypto_ETH-USD' in command:
+        elif 'crypto_ETH_USD' in command:
             ETH_USD = crypto.crypto_curse()
             text = str(ETH_USD) + ' $ за дозу эфирчика...'
             reply_markup = reply_markup_main
@@ -160,6 +165,8 @@ def main():
 
         else:
             text = 'Неизвестная команда, для списка команд выбирите команду /help'
+            reply_markup = reply_markup_main
+
 
         #отправляем сообщение
         send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup)
@@ -170,6 +177,12 @@ def main():
             
         return "!", 200
     except:
+
+        #тест - для тестирования
+        import traceback
+        traceback.print_exc()
+
+
 
         return "!", 200
 
