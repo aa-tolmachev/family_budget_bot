@@ -140,9 +140,18 @@ def main():
         #отчеты по кошельку
         elif 'report' in command:
             r = psql_methods.last_state(chat_id,command)
-            r = psql_methods.report_prev_expense(chat_id = chat_id , user_id = user_id)
-            text = r['text']
-            reply_markup = reply_markup_main
+            text = 'Какой отчет построить?'
+            reply_markup = {'keyboard': [['Траты - месяц назад'],['Траты - текущий месяц']], 'resize_keyboard': True, 'one_time_keyboard': False}
+
+
+        #если пришел запрос на какой-либо отчет - строим
+        elif last_state == '/report':
+            #выбираем отчет
+            if command == 'Траты - месяц назад':
+                r = psql_methods.last_state(chat_id,command)
+                r = psql_methods.report_prev_expense(chat_id = chat_id , user_id = user_id)
+                text = r['text']
+                reply_markup = reply_markup_main
 
 
 

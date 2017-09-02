@@ -231,39 +231,46 @@ def report_prev_expense(chat_id = None , user_id = None):
 
     cur.close()
 
-    #получаем необходимые даты
-    cur_year = datetime.now().year
-    cur_month = datetime.now().month
+    #Если данные за предыдущий месяц найдены
+    if df.shape[0] != 0: 
 
-    prev_year = cur_year if cur_month > 1 else cur_year -1
-    prev_month = cur_month - 1 if cur_month > 1 else 12
+        #получаем необходимые даты
+        cur_year = datetime.now().year
+        cur_month = datetime.now().month
 
-    next_year = cur_year if cur_month < 12 else cur_year + 1
-    next_month = cur_month + 1 if cur_month < 12 else 1
+        prev_year = cur_year if cur_month > 1 else cur_year -1
+        prev_month = cur_month - 1 if cur_month > 1 else 12
 
-    #получаем df за текущий и предыдущий месяцы
-    df_cur_month_expense = df[(df.date_fact >= pd.datetime(cur_year,cur_month,1)) & (df.date_fact < pd.datetime(next_year,next_month,1))][:] 
-    df_prev_month_expense = df[(df.date_fact >= pd.datetime(prev_year,prev_month,1)) & (df.date_fact < pd.datetime(cur_year,cur_month,1))][:] 
+        next_year = cur_year if cur_month < 12 else cur_year + 1
+        next_month = cur_month + 1 if cur_month < 12 else 1
 
-    #отсортированные и сгрупированные траты в текущем и предыдущем месяце
-    df_cur_month_expense_group = DataFrame(data = df_cur_month_expense.groupby(['transaction_type'])['summa'].sum() ).sort_values(by='summa' , ascending=False)
-    df_prev_month_expense_group = DataFrame(data = df_prev_month_expense.groupby(['transaction_type'])['summa'].sum() ).sort_values(by='summa' , ascending=False)
+        #получаем df за текущий и предыдущий месяцы
+        df_cur_month_expense = df[(df.date_fact >= pd.datetime(cur_year,cur_month,1)) & (df.date_fact < pd.datetime(next_year,next_month,1))][:] 
+        df_prev_month_expense = df[(df.date_fact >= pd.datetime(prev_year,prev_month,1)) & (df.date_fact < pd.datetime(cur_year,cur_month,1))][:] 
+
+        #отсортированные и сгрупированные траты в текущем и предыдущем месяце
+        df_cur_month_expense_group = DataFrame(data = df_cur_month_expense.groupby(['transaction_type'])['summa'].sum() ).sort_values(by='summa' , ascending=False)
+        df_prev_month_expense_group = DataFrame(data = df_prev_month_expense.groupby(['transaction_type'])['summa'].sum() ).sort_values(by='summa' , ascending=False)
 
 
-    #заводм справочник популярных трат
-    type_expand = ([])
-    for row in df_prev_month_expense_group.iterrows():
-        k  = 1
-        type_expand.append(row[0])
+        #заводм справочник популярных трат
+        type_expand = ([])
+        for row in df_prev_month_expense_group.iterrows():
+            k  = 1
+            type_expand.append(row[0])
 
-    sum_expand = df_prev_month_expense_group.values.astype(float)
-    all_sum = df_prev_month_expense_group['summa'].values.astype(float).sum()
-       
-    text = 'Ваши траты в прошлом месяце: \n' 
-    for type , sum in zip(type_expand , sum_expand):
-        text += type + ': ' + str(int(round(sum[0],0)))  + ' руб.\n'
-        
-    text += '\nИтого на сумму ' + str(int(round(all_sum,0))) + ' руб.\n'
+        sum_expand = df_prev_month_expense_group.values.astype(float)
+        all_sum = df_prev_month_expense_group['summa'].values.astype(float).sum()
+           
+        text = 'Ваши траты в прошлом месяце: \n' 
+        for type , sum in zip(type_expand , sum_expand):
+            text += type + ': ' + str(int(round(sum[0],0)))  + ' руб.\n'
+            
+        text += '\nИтого на сумму ' + str(int(round(all_sum,0))) + ' руб.\n'
+
+    else:
+
+        text = 'За прошлый месяц трат не найдено...' 
 
 
     response = {'text' : text
