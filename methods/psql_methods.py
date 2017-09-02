@@ -281,3 +281,88 @@ def report_prev_expense(chat_id = None , user_id = None):
     return response
 
 
+#отчет о тратах в текущем месяце
+def report_cur_expense(chat_id = None , user_id = None):
+    # создаем запрос
+    cur = conn.cursor()
+    #проверяем, что пользователя ранее не было
+    cur.execute("SELECT * from public.transaction_fact where user_id = %(user_id)s" % {'user_id' : user_id} )
+
+    df = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    cur.close()
+
+    #Если данные за предыдущий месяц найдены
+    if df.shape[0] != 0: 
+        #получаем необходимые даты
+        cur_year = datetime.now().year
+        cur_month = datetime.now().month
+
+        prev_year = cur_year if cur_month > 1 else cur_year -1
+        prev_month = cur_month - 1 if cur_month > 1 else 12
+
+        next_year = cur_year if cur_month < 12 else cur_year + 1
+        next_month = cur_month + 1 if cur_month < 12 else 1
+
+        #получаем df за текущий и предыдущий месяцы
+        df_cur_month_expense = df[(df.date_fact >= pd.datetime(cur_year,cur_month,1)) & (df.date_fact < pd.datetime(next_year,next_month,1))][:] 
+        df_all_prev_month_expense = df[(df.date_fact < pd.datetime(cur_year,cur_month,1))][:] 
+
+        #средние траты за все время по месяцам
+        df_all_prev_month_expense_group = DataFrame(data = df_all_prev_month_expense.groupby(['transaction_type'])['summa'].sum() ).sort_values(by='summa' , ascending=False)
+
+        df_all_prev_month_expense['year'] = df_all_prev_month_expense['date_fact'].dt.year
+        df_all_prev_month_expense['month'] = df_all_prev_month_expense['date_fact'].dt.month
+        df_all_prev_month_expense['yearmonth'] = df_all_prev_month_expense['year'].astype(str) +  df_all_prev_month_expense['month'].astype(str)
+
+        df_all_prev_month_expense_group = DataFrame(df_all_prev_month_expense.groupby(['transaction_type' , 'yearmonth'])['summa'].sum() ).reset_index()
+        df_all_prev_month_expense_group['summa'] = df_all_prev_month_expense_group['summa'].astype(float)
+        df_mean_expense = DataFrame(df_all_prev_month_expense_group.groupby(['transaction_type'])['summa'].mean()).reset_index()
+
+        
+        #отсортированные и сгрупированные траты в текущем и предыдущем месяце
+        df_cur_month_expense_group = DataFrame(data = df_cur_month_expense.groupby(['transaction_type'])['summa'].sum() ).sort_values(by='summa' , ascending=False)
+
+
+        #заводм справочник популярных трат
+        type_expand = ([])
+        for row in df_cur_month_expense_group.iterrows():
+            k  = 1
+            type_expand.append(row[0])
+
+        #суммы трат
+        sum_expand = df_cur_month_expense_group.values.astype(float)
+        all_sum = df_cur_month_expense_group['summa'].values.astype(float).sum()
+
+        text = 'Ваши траты в текущем месяце: \n' 
+        for type , sum in zip(type_expand , sum_expand):
+            if df_mean_expense[(df_mean_expense.transaction_type == type)].shape[0] == 0:
+                mean_change = ''
+            else:
+                change = sum / df_mean_expense[(df_mean_expense.transaction_type == type)]['summa'].values[0]
+
+                sign = 'less' if change < 1. else 'more'
+                emoji_sign = emoji(sign) if sign == 'more' else emoji(sign) + 'меньше'
+                str_change_vlue = str(int( (1. - change if sign == 'less' else change - 1.) * 100 ))
+                mean_change = '(' + emoji_sign + ' на ' + str_change_vlue + '% ' + ')'
+            
+            text += type + ': ' + str(int(round(sum[0],0)))  + ' руб.' + mean_change + '\n'
+
+        #разница в среднем
+        mean_sum = df_mean_expense['summa'].values.sum()
+        mean_sign = 'less' if mean_sum > all_sum else 'more'
+        emoji_sign = emoji(mean_sign) if mean_sign == 'more' else emoji(mean_sign) + 'меньше'
+        change_mean = all_sum - mean_sum if mean_sign == 'more' else mean_sum - all_sum
+        text += '\nИтого на сумму ' + str(int(round(all_sum,0))) + ' руб.' + ' (' + emoji_sign + ' на' + str(int(change_mean)) + ') ' + '\n'
+
+    else:
+        text = 'За текущий месяц трат не найдено...'
+
+
+    response = {'text' : text
+                ,'status' : 200
+                }
+
+
+    return response
+

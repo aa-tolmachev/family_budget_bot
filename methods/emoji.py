@@ -14,6 +14,8 @@ def emoji(name = None):
 			,'карандаш'  : '\U0000270F'
 			,'банк'  : '\U0001F3E6'
 			,'vhand' : '\U0000270C'
+			,'less' : '\U0001F44C'
+			,'more' : '\U0001F53A'
 	}
 
 	try:

@@ -152,7 +152,14 @@ def main():
                 r = psql_methods.report_prev_expense(chat_id = chat_id , user_id = user_id)
                 text = r['text']
                 reply_markup = reply_markup_main
-
+            elif command == 'Траты - текущий месяц':
+                r = psql_methods.last_state(chat_id,command)
+                r = psql_methods.report_cur_expense(chat_id = chat_id , user_id = user_id)
+                text = r['text']
+                reply_markup = reply_markup_main
+            else:
+                text = 'Ой нету ведь такого отчета, ну о чем Вы...'
+                reply_markup = reply_markup_main
 
 
 
