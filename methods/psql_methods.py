@@ -345,6 +345,8 @@ def report_cur_expense(chat_id = None , user_id = None):
                 emoji_sign = emoji(sign) if sign == 'more' else emoji(sign) + 'меньше'
                 str_change_vlue = str(int( (1. - change if sign == 'less' else change - 1.) * 100 ))
                 mean_change = '(' + emoji_sign + ' на ' + str_change_vlue + '% ' + ')'
+                #если str_change_vlue = 0, Зануляем
+                mean_change = '' if str_change_vlue == '0' else mean_change
             
             text += type + ': ' + str(int(round(sum[0],0)))  + ' руб.' + mean_change + '\n'
 
@@ -353,7 +355,7 @@ def report_cur_expense(chat_id = None , user_id = None):
         mean_sign = 'less' if mean_sum > all_sum else 'more'
         emoji_sign = emoji(mean_sign) if mean_sign == 'more' else emoji(mean_sign) + 'меньше'
         change_mean = all_sum - mean_sum if mean_sign == 'more' else mean_sum - all_sum
-        text += '\nИтого на сумму ' + str(int(round(all_sum,0))) + ' руб.' + ' (' + emoji_sign + ' на' + str(int(change_mean)) + ') ' + '\n'
+        text += '\nИтого на сумму ' + str(int(round(all_sum,0))) + ' руб.' + ' (' + emoji_sign + ' на ' + str(int(change_mean)) + ') ' + '\n'
 
     else:
         text = 'За текущий месяц трат не найдено...'
