@@ -125,7 +125,7 @@ def make_wallet(chat_id = None  ):
     return response
 
 #запись информация state_info_1
-def insert_state_info_1(chat_id = None , state_info_one = None ):
+def insert_state_info(chat_id = None , state_info = None , state_id = None):
     # создаем запрос
     cur = conn.cursor()
     #проверяем, что пользователя ранее не было
@@ -136,8 +136,21 @@ def insert_state_info_1(chat_id = None , state_info_one = None ):
     #если запись есть - записываем состояние
     if cur.statusmessage[-3:] != 'T 0':
         #обновляем запись в строчке последнего шага
-        cur.execute("UPDATE public.state  SET state_info_1 = '%(state_info_one)s' WHERE chat_id  = %(chat_id)s" % {'state_info_one' : state_info_one, 'chat_id' : chat_id}  )
-        conn.commit()
+        if state_id is None or state_id == 1:
+            cur.execute("UPDATE public.state  SET state_info_1 = '%(state_info)s' WHERE chat_id  = %(chat_id)s" % {'state_info' : state_info, 'chat_id' : chat_id}  )
+            conn.commit()
+        elif state_id == 2:
+            cur.execute("UPDATE public.state  SET state_info_2 = '%(state_info)s' WHERE chat_id  = %(chat_id)s" % {'state_info' : state_info, 'chat_id' : chat_id}  )
+            conn.commit()
+        elif state_id == 3:
+            cur.execute("UPDATE public.state  SET state_info_3 = '%(state_info)s' WHERE chat_id  = %(chat_id)s" % {'state_info' : state_info, 'chat_id' : chat_id}  )
+            conn.commit()
+        elif state_id == 4:
+            cur.execute("UPDATE public.state  SET state_info_4 = '%(state_info)s' WHERE chat_id  = %(chat_id)s" % {'state_info' : state_info, 'chat_id' : chat_id}  )
+            conn.commit()
+        elif state_id == 5:
+            cur.execute("UPDATE public.state  SET state_info_5 = '%(state_info)s' WHERE chat_id  = %(chat_id)s" % {'state_info' : state_info, 'chat_id' : chat_id}  )
+            conn.commit()
         cur.execute("UPDATE public.user  SET last_message_at = '%(message_at)s' WHERE chat_id  = %(chat_id)s" % {'message_at' : message_at, 'chat_id' : chat_id}  )
         conn.commit()
 
@@ -170,7 +183,7 @@ def clear_state(chat_id = None ):
 
     # создаем запрос
     cur = conn.cursor()
-    cur.execute("update public.state set state_info_1 = null , state_info_2 = null , state_info_3 = null where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
+    cur.execute("update public.state set state_info_1 = null , state_info_2 = null , state_info_3 = null , state_info_4 = null , state_info_5 = null where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
     conn.commit()
     cur.close()
 
@@ -184,7 +197,7 @@ def user_data(chat_id = None ):
     # создаем запрос
     cur = conn.cursor()
     #проверяем, что пользователя ранее не было
-    cur.execute("SELECT current_state , state_info_1 , state_info_2 , state_info_3 from public.state where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
+    cur.execute("SELECT current_state , state_info_1 , state_info_2 , state_info_3 , state_info_4 , state_info_5 from public.state where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
 
     df = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
 
@@ -199,6 +212,8 @@ def user_data(chat_id = None ):
         state_info_1 = df['state_info_1'][0]
         state_info_2 = df['state_info_2'][0]
         state_info_3 = df['state_info_3'][0]
+        state_info_4 = df['state_info_4'][0]
+        state_info_5 = df['state_info_5'][0]
         user_id = df_user['id'][0]
         personal_wallet_id = df_user['personal_wallet_id'][0]
         status = 200
@@ -207,6 +222,8 @@ def user_data(chat_id = None ):
         state_info_1 = 'unknown'
         state_info_2 = 'unknown'
         state_info_3 = 'unknown'
+        state_info_4 = 'unknown'
+        state_info_5 = 'unknown'
         user_id = 'unknown'
         personal_wallet_id = 'unknown'
         status = 404
@@ -217,6 +234,8 @@ def user_data(chat_id = None ):
                 ,'state_info_1' : state_info_1
                 ,'state_info_2' : state_info_2
                 ,'state_info_3' : state_info_3
+                ,'state_info_4' : state_info_4
+                ,'state_info_5' : state_info_5
                 ,'user_id' : user_id
                 ,'personal_wallet_id' : personal_wallet_id
                 ,'status' : status

@@ -88,6 +88,10 @@ def main():
         dict_user_data = psql_methods.user_data(chat_id)
         last_state = dict_user_data['last_state']
         state_info_1 = dict_user_data['state_info_1']
+        state_info_2 = dict_user_data['state_info_2']
+        state_info_3 = dict_user_data['state_info_3']
+        state_info_4 = dict_user_data['state_info_4']
+        state_info_5 = dict_user_data['state_info_5']
         user_id = dict_user_data['user_id']
         personal_wallet_id = dict_user_data['personal_wallet_id']
 
@@ -131,26 +135,24 @@ def main():
             reply_markup = reply_markup_main
 
         #Действия с советником
-        #1 траты
-        
-
-
+        #1 кошелек
+        #1->1 - выбор действия кошелька
         elif 'wallet' in command:
             r = psql_methods.last_state(chat_id,command)
             text = 'Что сделать с кошельком?'
-            reply_markup = {'keyboard': [['Траты факт - добавить']], 'resize_keyboard': True, 'one_time_keyboard': False}
+            reply_markup = {'keyboard': [['Траты факт - добавить'],['Траты план - добавить']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
-
+        #1->1->1 - добавление фактической траты
         elif last_state == '/wallet':
             if command == 'Траты факт - добавить':
                 r = psql_methods.last_state(chat_id,command)
                 text = 'Выберите тип траты'
                 reply_markup = {'keyboard': keyboard_expense, 'resize_keyboard': True, 'one_time_keyboard': True}
        
-        #если пришел запрос на добавление траты по типу - спрашиваем сумму
+        #1->1->1->1 - если пришел запрос на добавление траты по типу - спрашиваем сумму
         elif last_state == 'Траты факт - добавить':
             if command in list_expense_types:
-                r = psql_methods.insert_state_info_1(chat_id = chat_id , state_info_one = command)
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
                 text = 'ОК! Введите сумму операции'
                 reply_markup = None
             if state_info_1 in list_expense_types:
@@ -173,6 +175,105 @@ def main():
                 except:
                     text = 'Введите цифрами...'
                     reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+
+
+        #1->1->2 - добавление плановой траты
+        #тестировать - тут ошибка!!!
+        elif last_state == '/wallet':
+            if command == 'Траты план - добавить':
+                r = psql_methods.last_state(chat_id,command)
+                text = 'Это разовая трата или повторяется каждый месяц?'
+                reply_markup = {'keyboard': [['Разовая'],['Каждый месяц']], 'resize_keyboard': True, 'one_time_keyboard': False}
+
+        #сценарий для плановой разовой траты
+        #1->1->2->1
+        elif last_state == 'Траты план - добавить':
+            if command == 'Разовая':
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
+                text = 'Напишите, что за трата? я напомню Вам это.'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+
+        #1->1->2->1->1
+        elif last_state == 'Траты план - добавить':
+            if state_info_1 == 'Разовая' and state_info_2 is None:
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 2)
+                text = 'Понял понял, в какюу дату должна произойти трата? В формате -> 22.03.1990'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+
+        #1->1->2->1->1->1
+        elif last_state == 'Траты план - добавить':
+            if state_info_1 == 'Разовая' and state_info_2 is not None:
+
+                date_list = command.split('.')
+                error = 0
+                date_plan = ''
+                if len(date_list) != 3:
+                    text = 'Некорректный формат, повторите ввод даты'   
+                    reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                else:
+                    for date_part in date_list:
+                        try:
+                            if int(date_part) < 10 and len(date_part)==1:
+                                date_part = '0' + date_part
+                                date_plan = date_part + date_plan
+                            else:
+                                date_plan = date_part + date_plan
+                        except:
+                            error = 1
+                    
+                    if error == 1:
+                        text = 'Не могу разобрать... Проверьте формат и повторите ввод даты.'
+                        reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                    else:
+                        r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 3)
+                        text = 'К какому типу трат относится?'
+
+                        reply_markup = {'keyboard': keyboard_expense, 'resize_keyboard': True, 'one_time_keyboard': False}
+
+        #1->1->2->1->1->1->1
+        elif last_state == 'Траты план - добавить':
+            if state_info_1 == 'Разовая' and state_info_3 is not None:
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 4)
+                text = 'ОК! Введите сумму операции'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+
+        #1->1->2->1->1->1->1->1
+        elif last_state == 'Траты план - добавить':
+            if state_info_1 == 'Разовая' and state_info_4 is not None:
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 5)
+                command = command.replace(',','.')
+                try:
+                    summa = round(float(command),2)
+                    #!!!
+                    #здесь сделать новую функцию и вызов add_transaction_plan_once
+                    r = psql_methods.add_transaction_fact(chat_id = chat_id , summa = summa , dict_user_data = dict_user_data)
+                    
+                    if r == 200:
+                        text = 'Операция добавлена! Я напомню о ней за день!'
+                        r = psql_methods.clear_state(chat_id = chat_id)
+                        r = psql_methods.last_state(chat_id,'/main')
+
+                        reply_markup = reply_markup_main
+                    if r == 400:
+                        text = 'Ведутся какие-то работы... Повторите позже...'
+                        r = psql_methods.clear_state(chat_id = chat_id)
+                        r = psql_methods.last_state(chat_id,'/main')
+
+                        reply_markup = reply_markup_main
+                except:
+                    text = 'Введите цифрами...'
+                    reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+
+
+
+
+
+
+        #сценарий для плановой периодической траты
+
+
+
+
 
         #2 - отчеты
         #отчеты по кошельку
