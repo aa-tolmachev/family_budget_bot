@@ -88,6 +88,8 @@ def make_wallet(chat_id = None  ):
     #если по пользователю нет данных - просьба зарегистрироваться
     if df.shape[0] == 0:
         text = 'Сначала зарегистрируйтесь, иначе я не могу... /start'
+        reply_markup = {'keyboard': [['/start']], 'resize_keyboard': True, 'one_time_keyboard': False}
+
         status = 200
     #если есть данные
     else:
@@ -106,12 +108,15 @@ def make_wallet(chat_id = None  ):
             cur.execute("UPDATE public.user  SET personal_wallet_id = '%(wallet_id)s' WHERE chat_id  = %(chat_id)s" % {'wallet_id' : wallet_id, 'chat_id' : chat_id}  )
             conn.commit()
 
-            text = emoji('банк') + 'Круто, личный кошелек создан! можем его использовать!' + emoji('смайл_спокойствие')
+            text = emoji('банк') + 'Круто, личный кошелек создан! можем начинать!' + emoji('смайл_спокойствие') + '\n'
+            text += 'для описания функций можешь использовать помощь -> /help'
             status = 200
+
+        reply_markup = {'keyboard': [['/wallet_action']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
     cur.close()
 
-    reply_markup = {'keyboard': [['/wallet_action']], 'resize_keyboard': True, 'one_time_keyboard': False}
+    
     response = {'status' : status
                 ,'text' : text
                 ,'reply_markup' : reply_markup

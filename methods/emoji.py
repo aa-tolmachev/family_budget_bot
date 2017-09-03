@@ -16,6 +16,7 @@ def emoji(name = None):
 			,'vhand' : '\U0000270C'
 			,'less' : '\U0001F44C'
 			,'more' : '\U0001F53A'
+			,'thumbs_up' : '\U0001F44D'
 	}
 
 	try:
