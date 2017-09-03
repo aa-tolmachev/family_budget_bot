@@ -5,7 +5,7 @@ from flask import make_response
 import os
 import json
 from pandas import DataFrame
-
+import traceback
 
 from methods import access
 from methods import crypto
@@ -48,8 +48,8 @@ def hello():
 #тест крона
 @application.route('/cron_test', methods=['GET', 'POST'])
 def cron_test():
-    json_update = json.loads(request.get_data())
-    text = str(json_update)
+    n = request.args.get("n")
+    text = str(n)
     chat_id = 84723474
 
     send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = None)
@@ -207,7 +207,6 @@ def main():
     except:
 
         #тест - для тестирования
-        import traceback
         traceback.print_exc()
 
 
