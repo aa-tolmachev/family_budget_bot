@@ -228,7 +228,7 @@ def main():
 
                         reply_markup = {'keyboard': keyboard_expense, 'resize_keyboard': True, 'one_time_keyboard': False}
             #1->1->2->1->1->1->1
-            elif state_info_1 == 'Разовая' and state_info_3 is not None:
+            elif state_info_1 == 'Разовая' and state_info_4 is None:
                 r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 4)
                 text = 'ОК! Введите сумму операции'
                 reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
