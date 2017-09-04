@@ -13,6 +13,7 @@ from methods.emoji import emoji
 from methods import telegram_bot_methods
 from methods import google_maps_methods
 from methods import psql_methods
+from methods import psql_cron_methods
 from methods import reply
 
 
@@ -52,12 +53,19 @@ def cron_test():
     n = request.args.get("n")
     text = str(n)
     chat_id = 84723474
-
     send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = None)
 
     return "!", 200
 
 
+
+#рабочий крон cron-job.org
+@application.route('/cron_woker_1', methods=['GET', 'POST'])
+def cron_worker_1():
+    #берем данные из get запроса
+    model = request.args.get("model")
+    r = psql_cron_methods.main_woker_1(model = model)
+    return "!", 200
 
 
 
@@ -80,9 +88,6 @@ def main():
         #получаем список трат
         keyboard_expense , list_expense_types = reply.list_expense_types()
 
-
-        #действия с кошельком
-        list_wallet_act = ['Траты факт - добавить']
 
         #получаем текущее состояние
         dict_user_data = psql_methods.user_data(chat_id)
@@ -134,7 +139,10 @@ def main():
             text = 'Окей!' + emoji('thumbs_up') + ' Что хотим сделать?'
             reply_markup = reply_markup_main
 
-        #Действия с советником
+
+        ############################################################
+        #################  Действия с советником  ##################
+        ############################################################
         #1 кошелек
         #1->1 - выбор действия кошелька
         elif 'wallet' in command:
@@ -255,9 +263,6 @@ def main():
                 except:
                     text = 'Введите цифрами...'
                     reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
-
-
-
 
 
 
