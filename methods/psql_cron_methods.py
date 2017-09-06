@@ -30,7 +30,7 @@ def now_str():
     return now_str
 
 #завтрашная дата без часов минут
-def tomorrow_str():
+def tomorrow_str_func():
     tomorrow = datetime.now()+ timedelta(days=1)
     tomorrow_str = str(tomorrow.year)+str(tomorrow.month if tomorrow.month >= 10 else  '0'+str(tomorrow.month))+str(tomorrow.day if tomorrow.day >= 10 else  '0'+str(tomorrow.day)) 
     return tomorrow_str
@@ -62,7 +62,7 @@ def tomorrow_expense():
                 ,'tomorrow_messages' : []
                 }
     #получаем дату в строке завтрашнего дня
-    tomorrow_str = tomorrow_str()
+    tomorrow_str = tomorrow_str_func()
     #тест
     tomorrow_str = '20170907'
     # создаем запрос
