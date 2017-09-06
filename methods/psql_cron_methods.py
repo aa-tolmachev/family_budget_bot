@@ -44,6 +44,7 @@ def main_woker_1( model = None):
         #сообщение о завтрашних тратах - направляем на всех пользователей
         if model == 'tomorrow_expense':
             r = tomorrow_expense()
+            return r
 
 
     return 200

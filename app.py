@@ -71,13 +71,14 @@ def cron_worker_1():
         reply_markup_main = g_reply_markup_main
         r = psql_cron_methods.main_woker_1(model = model)
 
-        if r['system_message'] == 'Have reports':
-            list_messages = r['user_messages']
-            for message in list_messages:
-                #отправляем сообщение
-                chat_id = message['chat_id']
-                text = message['message']
-                send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup_main)
+        if 'int' not in str(type(r)):
+            if r['system_message'] == 'Have reports':
+                list_messages = r['user_messages']
+                for message in list_messages:
+                    #отправляем сообщение
+                    chat_id = message['chat_id']
+                    text = message['message']
+                    send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup_main)
 
 
 
