@@ -370,6 +370,8 @@ def report_cur_expense(chat_id = None , user_id = None):
 
         df_all_prev_month_expense_group = DataFrame(df_all_prev_month_expense.groupby(['transaction_type' , 'yearmonth'])['summa'].sum() ).reset_index()
         df_all_prev_month_expense_group['summa'] = df_all_prev_month_expense_group['summa'].astype(float)
+        if df_all_prev_month_expense_group.shape[0] == 0:
+            df_all_prev_month_expense_group['transaction_type'] = None
         df_mean_expense = DataFrame(df_all_prev_month_expense_group.groupby(['transaction_type'])['summa'].mean()).reset_index()
 
         

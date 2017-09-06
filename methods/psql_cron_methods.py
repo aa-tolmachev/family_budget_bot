@@ -23,11 +23,17 @@ conn = psycopg2.connect("dbname='%(dbname)s' port='%(port)s' user='%(user)s' hos
 
 
 
-#текущая метка времени
+#текущая метка времени с минутой часами
 def now_str():
     now = datetime.now()
     now_str = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.day)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
     return now_str
+
+#завтрашная дата без часов минут
+def tomorrow_str():
+    tomorrow = datetime.now()+ timedelta(days=1)
+    tomorrow_str = str(tomorrow.year)+str(tomorrow.month if tomorrow.month >= 10 else  '0'+str(tomorrow.month))+str(tomorrow.day if tomorrow.day >= 10 else  '0'+str(tomorrow.day)) 
+    return tomorrow_str
 
 
 #основная функция приема с worker_1
@@ -35,7 +41,7 @@ def main_woker_1( model = None):
     if model is None:
         return 400
     else:
-        #сообщение о завтрашних тратах
+        #сообщение о завтрашних тратах - направляем на всех пользователей
         if model == 'tomorrow_expense':
             r = tomorrow_expense()
 
@@ -49,34 +55,75 @@ def main_woker_1( model = None):
 
 #отчет - плановые траты на завтра -  tomorrow_expense
 def tomorrow_expense():
-    #скопировать из test
-    x = 1
-
-
-    return 200
-
-
-
-#заглушка
-def test( model = None):
+    #формируем ответ
+    response = {'status' : 200
+                ,'report' : 'tomorrow_expense'
+                ,'message' : 'No reports'
+                ,'tomorrow_messages' : []
+                }
+    #получаем дату в строке завтрашнего дня
+    tomorrow_str = tomorrow_str()
+    #тест
+    tomorrow_str = '20170907'
     # создаем запрос
     cur = conn.cursor()
-    #проверяем, что пользователя ранее не было
-    cur.execute("SELECT * from public.user where chat_id = %(chat_id)s" % {'chat_id' : chat_id} )
-    #если записи не было - создаем
-    if cur.statusmessage[-3:] == 'T 0':
-        #создаем запись в строчке последнего шага
-        cur.execute("INSERT INTO public.state (chat_id , current_state)  VALUES (%(chat_id)s, '/start')" % {'chat_id' : chat_id} )
-        conn.commit()
+    #смотрим, какие данные завтра есть
+    cur.execute("SELECT * from public.transaction_plan where date_plan = '%(tomorrow_str)s'" % {'tomorrow_str' : tomorrow_str} )
 
-        #регистрируем пользователя
-        first_name = json_update['message']['chat']['first_name']
-        last_name = json_update['message']['chat']['last_name']
-        now = datetime.now()
-        created_at = now_str()
-        last_message_at = created_at
-        cur.execute("INSERT INTO public.user (chat_id,first_name,last_name,created_at,last_message_at)  VALUES (%(chat_id)s, '%(first_name)s','%(last_name)s','%(created_at)s','%(last_message_at)s')" % {'chat_id' : chat_id , 'first_name' : first_name , 'last_name' : last_name , 'created_at' : created_at , 'last_message_at' : last_message_at} )
-        conn.commit()
-    cur.close()
+    #получаем данные
+    df_tomorrow_transaction_plan = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
 
-    return 200
+    if df_tomorrow_transaction_plan.shape[0] == 0:
+        cur.close()
+        return response
+    else:
+        cur.execute("select id , chat_id from public.user" )
+        df_user = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+        cur.close()
+
+    #подгатавливаем лист завтрашних плановых операций
+    tomorrow_messages = []
+    #делаем выборку из пользователей, по кому завтра будет операция
+    list_tomorrow_user_id = list(df_tomorrow_transaction_plan['user_id'].unique())
+    df_tomorrow_user_id = df_user[df_user.id.isin(list_tomorrow_user_id)][:]
+
+    #проходим по ним и заполняем листр завтрашних плановых операций
+    for i,row in df_tomorrow_user_id.iterrows():
+        #получаем данные пользователя
+        user_id = row.id
+        chat_id = row.chat_id
+        #получаем сообщения по нему
+        interest_info = df_tomorrow_transaction_plan[(df_tomorrow_transaction_plan.user_id == user_id)][['transaction_type','transaction_name','summa']][:]
+        list_interest_info = list(interest_info.T.to_dict('list').values())
+        
+        text = 'Привет! Напоминаю, завтра есть запланированные траты: \n\n'
+        num = 1
+        for transaction_plan in list_interest_info:
+            transaction_name = transaction_plan[1]
+            summa = int(transaction_plan[2])
+            text += str(num) + ': ' + transaction_name + ', Сумма: ' +str(summa)  + ' руб.\n'
+            
+            num += 1
+            
+        text += '\nНе забудьте решить эти вопросы, а то мало ли...'
+            
+        
+        
+        
+        #формируем итоговый словарь по пользователю
+        user_dict_tomorrow_messages = {'user_id' : user_id
+                                      ,'chat_id' : chat_id
+                                      ,'message' : text}
+        #добавляем инфо
+        tomorrow_messages.append(user_dict_tomorrow_messages)
+        
+
+    response['system_message'] = 'Have reports'
+    response['user_messages'] = tomorrow_messages
+
+
+    #реализовать обработку response в app и отправку сообщений пользователям
+    return response
+
+
+

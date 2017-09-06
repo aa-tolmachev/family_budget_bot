@@ -26,7 +26,8 @@ api = access.api()
 
 application = Flask(__name__)  # Change assignment here
 
-
+#главное меню делаем глобальной переменной
+g_reply_markup_main = {'keyboard': [['/wallet'],['/report'],['/crypto_ETH_USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
 
 # создаем webhook
@@ -62,10 +63,28 @@ def cron_test():
 #рабочий крон cron-job.org
 @application.route('/cron_woker_1', methods=['GET', 'POST'])
 def cron_worker_1():
-    #берем данные из get запроса
-    model = request.args.get("model")
-    r = psql_cron_methods.main_woker_1(model = model)
-    return "!", 200
+    try:
+        #берем данные из get запроса
+        model = request.args.get("model")
+        #главное меню
+        global g_reply_markup_main
+        reply_markup_main = g_reply_markup_main
+        r = psql_cron_methods.main_woker_1(model = model)
+
+        if r['system_message'] == 'Have reports':
+            list_messages = r['user_messages']
+            for message in list_messages:
+                #отправляем сообщение
+                chat_id = message['chat_id']
+                text = message['message']
+                send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup_main)
+
+
+
+        return "!", 200
+    except:
+        return "!", 200
+
 
 
 
@@ -79,7 +98,9 @@ def main():
         #Изначально для отправки кнопки пустые
         reply_markup = None
         #главное меню
-        reply_markup_main = {'keyboard': [['/wallet'],['/report'],['/crypto_ETH_USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
+        global g_reply_markup_main
+        reply_markup_main = g_reply_markup_main
+        #reply_markup_main = {'keyboard': [['/wallet'],['/report'],['/crypto_ETH_USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
         #получаем id чата и текст сообщения
         chat_id = json_update['message']['chat']['id']
