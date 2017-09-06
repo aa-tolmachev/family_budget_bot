@@ -83,6 +83,8 @@ def cron_worker_1():
 
         return "!", 200
     except:
+        #тест - для тестирования
+        traceback.print_exc()
         return "!", 200
 
 
