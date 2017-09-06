@@ -65,7 +65,7 @@ def tomorrow_expense():
     #получаем дату в строке завтрашнего дня
     tomorrow_str = tomorrow_str_func()
     #тест
-    tomorrow_str = '20170907'
+    #tomorrow_str = '20170907'
     # создаем запрос
     cur = conn.cursor()
     #смотрим, какие данные завтра есть

@@ -76,8 +76,7 @@ def cron_worker_1():
                 list_messages = r['user_messages']
                 for message in list_messages:
                     #отправляем сообщение
-                    print(message)
-                    chat_id = message['chat_id']
+                    chat_id = str(message['chat_id'])
                     text = message['message']
                     send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup_main)
 
