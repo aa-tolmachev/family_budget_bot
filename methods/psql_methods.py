@@ -206,6 +206,33 @@ def add_transaction_plan(chat_id = None , summa = None , dict_user_data = None):
 
         return 200
 
+def add_transaction_plan_month(chat_id = None , summa = None , dict_user_data = None):
+    #получаем данные из справочника
+    once_name = dict_user_data['state_info_1']
+    plan_name = dict_user_data['state_info_2']
+    plan_day = dict_user_data['state_info_3']
+    plan_type = dict_user_data['state_info_4']
+    user_id = dict_user_data['user_id']
+    personal_wallet_id = dict_user_data['personal_wallet_id']
+
+    #проверяем наличие данных
+    for state_info in [once_name , plan_name , plan_day , plan_type , user_id ,personal_wallet_id ]:
+        if state_info is None:
+            return 400
+    #проверяем корректность данных
+    if 'float' not in str(type(summa)):
+        return 400
+    else:
+        # создаем запрос
+        cur = conn.cursor()
+        #получаем время записи
+        cur.execute("INSERT INTO public.month_transaction_plan (user_id,wallet_id,day,transaction_name,transaction_type,summa) VALUES (%(user_id)s,%(wallet_id)s, %(plan_day)s,'%(transaction_name)s','%(transaction_type)s' , %(summa)s  )" % {'user_id' : user_id , 'wallet_id' : personal_wallet_id , 'transaction_type' : plan_type , 'transaction_name' : plan_name , 'summa' : summa , 'plan_day' : plan_day}  )
+        conn.commit()
+        cur.close()
+
+        return 200
+
+
 
 def clear_state(chat_id = None ):
 

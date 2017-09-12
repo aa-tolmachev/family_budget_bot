@@ -41,10 +41,19 @@ def main_woker_1( model = None):
     if model is None:
         return 400
     else:
+        #формат ответа
+        test_resp = {'status' : 200
+                ,'report' : 'tomorrow_expense'
+                ,'message' : 'Have reports'
+                ,'tomorrow_messages' : [{'user_id' : user_id ,'chat_id' : chat_id ,'message' : text}
+                                        , {'user_id' : user_id ,'chat_id' : chat_id ,'message' : text}
+                                        ]
+                }
         #сообщение о завтрашних тратах - направляем на всех пользователей
         if model == 'tomorrow_expense':
             r = tomorrow_expense()
             return r
+            
 
 
     return 200

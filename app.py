@@ -291,7 +291,68 @@ def main():
 
 
 
-        #сценарий для плановой периодической траты
+            #сценарий для плановой периодической траты
+            elif command == 'Каждый месяц':
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
+                text = 'Напишите, что за трата? я буду напоминать Вам о ней каждый месяц.'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+            #1->1->2->2->1
+            elif state_info_1 == 'Каждый месяц' and state_info_2 is None:
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 2)
+                text = 'ОК! в какой день месяца нужно делать эту трату? 1 - 28'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+            #1->1->2->2->1->1
+            elif state_info_1 == 'Каждый месяц' and state_info_3 is None:
+
+                error = 0
+                try:
+                    date_day = int(command)
+                    if date_day > 28:
+                        error = 1
+                except:
+                    date_day = 'unknown'
+                    error = 1
+
+                if error == 1:
+                    text = 'Ну цифру напиши от 1 до 28'   
+                    reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                else:
+
+                    r = psql_methods.insert_state_info(chat_id = chat_id , state_info = date_day , state_id = 3)
+                    text = 'Записал! К какому типу трат относится?'
+
+                    reply_markup = {'keyboard': keyboard_expense, 'resize_keyboard': True, 'one_time_keyboard': False}
+            #1->1->2->2->1->1->1
+            elif state_info_1 == 'Каждый месяц' and state_info_4 is None:
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 4)
+                text = 'ОК! Введите сумму, которую необходимо тратить.'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+            #1->1->2->2->1->1->1->1
+            elif state_info_1 == 'Каждый месяц' and state_info_4 is not None:
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 5)
+                command = command.replace(',','.')
+                try:
+                    summa = round(float(command),2)
+                    r = psql_methods.add_transaction_plan_month(chat_id = chat_id , summa = summa , dict_user_data = dict_user_data)
+                    
+                    if r == 200:
+                        text = 'Операция добавлена! Я буду напоминать Вам о ней, поручитесь на меня!'
+                        r = psql_methods.clear_state(chat_id = chat_id)
+                        r = psql_methods.last_state(chat_id,'/main')
+
+                        reply_markup = reply_markup_main
+                    if r == 400:
+                        text = 'Ведутся какие-то работы... Повторите позже...'
+                        r = psql_methods.clear_state(chat_id = chat_id)
+                        r = psql_methods.last_state(chat_id,'/main')
+
+                        reply_markup = reply_markup_main
+                except:
+                    traceback.print_exc()
+                    text = 'Введите цифрами...'
+                    reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+
+
 
 
 
