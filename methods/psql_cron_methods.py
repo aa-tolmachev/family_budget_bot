@@ -45,8 +45,8 @@ def main_woker_1( model = None):
         test_resp = {'status' : 200
                 ,'report' : 'tomorrow_expense'
                 ,'message' : 'Have reports'
-                ,'tomorrow_messages' : [{'user_id' : user_id ,'chat_id' : chat_id ,'message' : text}
-                                        , {'user_id' : user_id ,'chat_id' : chat_id ,'message' : text}
+                ,'tomorrow_messages' : [{'user_id' : 13 ,'chat_id' : 111111 ,'message' : 'лалалей'}
+                                        , {'user_id' : 14 ,'chat_id' : 111112 ,'message' : 'налевай'}
                                         ]
                 }
         #сообщение о завтрашних тратах - направляем на всех пользователей
@@ -73,8 +73,8 @@ def tomorrow_expense():
                 }
     #получаем дату в строке завтрашнего дня
     tomorrow_str = tomorrow_str_func()
-    #тест
-    #tomorrow_str = '20170907'
+    tomorrow_day = int(tomorrow_str[-2:])
+
     # создаем запрос
     cur = conn.cursor()
     #смотрим, какие данные завтра есть
@@ -82,6 +82,13 @@ def tomorrow_expense():
 
     #получаем данные
     df_tomorrow_transaction_plan = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #получаем ежемесячные данные
+    cur.execute("select * from public.month_transaction_plan where day = %(tomorrow_day)s" % { 'tomorrow_day' : tomorrow_day} )
+    df_tomorrow_transaction_month = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #формируем итог
+    df_tomorrow_transaction_plan = df_tomorrow_transaction_plan.append(df_tomorrow_transaction_month).reset_index()[:]
 
     if df_tomorrow_transaction_plan.shape[0] == 0:
         cur.close()
