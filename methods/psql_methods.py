@@ -452,7 +452,7 @@ def report_cur_expense(chat_id = None , user_id = None):
     return response
 
 #Список плановых трат
-def list_transaction_plan(chat_id = None  , user_id = None):
+def list_transaction_plan(chat_id = None  , user_id = None ):
     
     #формат ответа
     response = {'status' : 200
@@ -543,5 +543,97 @@ def list_transaction_plan(chat_id = None  , user_id = None):
     response['text'] = text
     response['reply_markup'] = reply_markup
     response['system_message'] = system_message
+
+    return response
+
+
+
+
+#Удаление плановой операции
+def delete_transaction_plan(chat_id = None  , user_id = None , delete_num = None):
+    
+    #формат ответа
+    response = {'status' : 200
+                ,'report' : 'delete_transaction_plan'
+                ,'system_message' : 'No report'
+                ,'text' : None
+                ,'reply_markup' : None
+                }
+
+    # создаем запрос
+    cur = conn.cursor()
+
+    now_strin = now_str()[:8]
+    now_day = int(now_strin[-2:])
+    now_month = int(now_strin[4:6])
+
+    #смотрим, какие данные завтра есть
+    cur.execute("SELECT * from public.transaction_plan where date_plan >= '%(now_strin)s' and Extract(month from date_plan) = %(now_month)s and user_id = %(user_id)s" % {'now_strin' : now_strin , 'user_id' : user_id , 'now_month' : now_month} )
+
+    #получаем данные
+    df_transaction_plan = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #получаем ежемесячные данные
+    cur.execute("select * from public.month_transaction_plan where day >= %(now_day)s and user_id = %(user_id)s" % { 'now_day' : now_day , 'user_id' : user_id} )
+    df_transaction_month = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #формируем итог
+    df_transaction_plan = df_transaction_plan.append(df_transaction_month)
+
+    #если ничего нет - возвращаем ответ
+    if df_transaction_plan.shape[0] == 0:
+        cur.close()
+        #return response
+    else:
+        cur.close()
+        
+    #достаем дни из разовых трат    
+    if df_transaction_plan['date_plan'].dtypes != 'O':
+        df_transaction_plan['day_month'] = df_transaction_plan['date_plan'].dt.day
+    else:
+        df_transaction_plan['day_month'] = df_transaction_plan['date_plan']
+
+    #формируем единую метку дней
+    day = []
+    for day1 , day2 in zip (df_transaction_plan['day'].values , df_transaction_plan['day_month'].values):
+        if np.isnan(day1):
+            day.append(int(day2))
+        else:
+            day.append(int(day1))
+            
+    df_transaction_plan['day'] = day   
+
+
+    df_transaction_plan.sort_values(by = ['day'] , inplace = True , ascending = True)
+
+    df_transaction_plan.reset_index(inplace = True)
+
+    df_transaction_plan.drop(labels = 'index' , axis = 1 , inplace = True)
+
+    #выбираем нужный элемент
+    if df_transaction_plan.shape[0] >= delete_num:
+        dict_delete_plan = df_transaction_plan.iloc[delete_num-1]
+        #если ежемесячная - удаляем ее, иначе разовую
+        cur = conn.cursor()
+        id_delete = dict_delete_plan['id']
+        if np.isnan(dict_delete_plan['day_month']):
+            cur.execute("delete from public.month_transaction_plan where id = %(id_delete)s" % {'id_delete' : id_delete} )
+            conn.commit()
+        else:
+            cur.execute("delete from public.transaction_plan where id = %(id_delete)s" % {'id_delete' : id_delete} )
+            conn.commit()
+            
+        cur.close()
+        
+        text = 'Плановая операция удалена сир!'
+        reply_markup = None
+            
+        
+    else:
+        text = 'Легче ковбой, введи существующий номер операции'
+        reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+
+    response['text'] = text
+    response['reply_markup'] = reply_markup
 
     return response

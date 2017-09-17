@@ -372,6 +372,28 @@ def main():
                 r = psql_methods.last_state(chat_id,'Траты план - добавить')
                 text = 'Это разовая трата или повторяется каждый месяц?'
                 reply_markup = {'keyboard': [['Разовая'],['Каждый месяц']], 'resize_keyboard': True, 'one_time_keyboard': False}
+            #1->1->3->2
+            if command == 'Удалить':
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
+                text = 'Ладушки-аладушки! Напишите номер плановой операции, которую нужно удалить, все сделаю!'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+            #1->1->3->2->1
+            elif state_info_1 == 'Удалить' and state_info_2 is None:
+                try:
+                    delete_num = int(command)
+                    r = psql_methods.delete_transaction_plan(chat_id, user_id ,delete_num)
+                    text = r['text']
+                    reply_markup = reply_markup_main if r['reply_markup'] is None else r['reply_markup']
+                    r = psql_methods.clear_state(chat_id = chat_id)
+                    r = psql_methods.last_state(chat_id,'/main')
+
+                except:
+                    traceback.print_exc()
+                    text = 'мммм, чего то не пойму... Введите существующий номер плановой операции, указанной в списке'
+                    reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                
+
+
 
 
 
