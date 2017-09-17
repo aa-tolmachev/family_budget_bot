@@ -27,7 +27,7 @@ api = access.api()
 application = Flask(__name__)  # Change assignment here
 
 #главное меню делаем глобальной переменной
-g_reply_markup_main = {'keyboard': [['/wallet'],['/report'],['/crypto_ETH_USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
+g_reply_markup_main = {'keyboard': [['Кошелек'],['Отчеты'],['Инвестиции']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
 
 # создаем webhook
@@ -103,7 +103,6 @@ def main():
         #главное меню
         global g_reply_markup_main
         reply_markup_main = g_reply_markup_main
-        #reply_markup_main = {'keyboard': [['/wallet'],['/report'],['/crypto_ETH_USD']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
         #получаем id чата и текст сообщения
         chat_id = json_update['message']['chat']['id']
@@ -132,9 +131,9 @@ def main():
             text += 'Я веду домашний бюджет и напоминаю об операциях в течение месяца. \n'
             text += 'Я развиваюсь в свободное время, потом будет интереснее. \n'
             text += 'Сначала заведите свой кошелек и забудьте о том, чтобы держать бюджет семьи в голове!' + emoji('банкноты')
-            reply_markup = {'keyboard': [['/make_wallet']], 'resize_keyboard': True, 'one_time_keyboard': False}
+            reply_markup = {'keyboard': [['Создать кошелек']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
-        elif 'make_wallet' in command:
+        elif 'Создать кошелек' in command:
             r = psql_methods.last_state(chat_id,command)
             r = psql_methods.make_wallet(chat_id)
             text = r['text']
@@ -145,9 +144,9 @@ def main():
             r = psql_methods.last_state(chat_id,command)
             text = 'Привет!' +  emoji('фанфары') + '\n'
             text += 'Что я понимаю: \n'
-            text += '/wallet - работа с кошельком \n'
-            text += '/report - отчеты \n'
-            text += '/course - курсы валют \n'
+            text += 'Кошелек - работа с кошельком, формирование фактических и плановых трат \n'
+            text += 'Отчеты - различный отчеты с интересной информацией \n'
+            text += 'Инвестиции - информация по курсам валют, личным вкладам, инвестиционным портфелям \n'
             reply_markup = reply_markup_main
 
         elif 'wallet_action' in command:
@@ -169,13 +168,13 @@ def main():
         ############################################################
         #1 кошелек
         #1->1 - выбор действия кошелька
-        elif 'wallet' in command:
+        elif 'Кошелек' in command:
             r = psql_methods.last_state(chat_id,command)
             text = 'Что сделать с кошельком?'
             reply_markup = {'keyboard': [['Траты факт - добавить'],['Траты план - добавить']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
         #1->1-> - выбор траты 
-        elif last_state == '/wallet':
+        elif last_state == 'Кошелек':
             #1->1->1 - добавление фактической траты
             if command == 'Траты факт - добавить':
                 r = psql_methods.last_state(chat_id,command)
@@ -360,14 +359,14 @@ def main():
 
         #2 - отчеты
         #отчеты по кошельку
-        elif 'report' in command:
+        elif 'Отчеты' in command:
             r = psql_methods.last_state(chat_id,command)
             text = 'Какой отчет построить?'
             reply_markup = {'keyboard': [['Траты - месяц назад'],['Траты - текущий месяц']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
 
         #если пришел запрос на какой-либо отчет - строим
-        elif last_state == '/report':
+        elif last_state == 'Отчеты':
             #выбираем отчет
             if command == 'Траты - месяц назад':
                 r = psql_methods.last_state(chat_id,command)
@@ -388,7 +387,7 @@ def main():
 
         #3 - курсы
         #здесь запосы к криптовалютам
-        elif 'crypto_ETH_USD' in command:
+        elif 'Инвестиции' in command:
             ETH_USD = crypto.crypto_curse()
             text = str(ETH_USD) + ' $ за дозу эфирчика...'
             reply_markup = reply_markup_main
