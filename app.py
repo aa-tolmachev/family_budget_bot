@@ -171,7 +171,7 @@ def main():
         elif 'Кошелек' in command:
             r = psql_methods.last_state(chat_id,command)
             text = 'Что сделать с кошельком?'
-            reply_markup = {'keyboard': [['Траты факт - добавить'],['Траты план - добавить']], 'resize_keyboard': True, 'one_time_keyboard': False}
+            reply_markup = {'keyboard': [['Траты факт - добавить'],['Траты план - добавить'],['Траты план - список']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
         #1->1-> - выбор траты 
         elif last_state == 'Кошелек':
@@ -185,6 +185,16 @@ def main():
                 r = psql_methods.last_state(chat_id,command)
                 text = 'Это разовая трата или повторяется каждый месяц?'
                 reply_markup = {'keyboard': [['Разовая'],['Каждый месяц']], 'resize_keyboard': True, 'one_time_keyboard': False}
+            #1->1->3 - список плановых трат
+            if command == 'Траты план - список':
+                r = psql_methods.last_state(chat_id,command)
+                r = psql_methods.list_transaction_plan(chat_id, user_id)
+                if r['system_message'] == 'Have reports':
+                    text = r['text']
+                    reply_markup = r['reply_markup']
+                else:
+                    text = 'В текущем месяце нет плановых трат...'
+                    reply_markup = reply_markup_main
 
 
 
@@ -350,6 +360,18 @@ def main():
                     traceback.print_exc()
                     text = 'Введите цифрами...'
                     reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+
+
+
+        #сценарий для работы с Траты план - список
+        #1->1->3->
+        elif last_state == 'Траты план - список':
+            #1->1->3->1
+            if command == 'Добавить':
+                #переходим на сценарий 1->1->2
+                r = psql_methods.last_state(chat_id,'Траты план - добавить')
+                text = 'Это разовая трата или повторяется каждый месяц?'
+                reply_markup = {'keyboard': [['Разовая'],['Каждый месяц']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
 
 

@@ -8,6 +8,7 @@ from time import sleep
 import psycopg2
 from pandas import DataFrame
 import pandas as pd
+import numpy as np
 
 token = access.token()
 api = access.api()
@@ -450,3 +451,97 @@ def report_cur_expense(chat_id = None , user_id = None):
 
     return response
 
+#Список плановых трат
+def list_transaction_plan(chat_id = None  , user_id = None):
+    
+    #формат ответа
+    response = {'status' : 200
+                ,'report' : 'transaction_plan'
+                ,'system_message' : 'No report'
+                ,'text' : 'NaN'
+                ,'reply_markup' : 'NaN'
+                }
+
+    # создаем запрос
+    cur = conn.cursor()
+
+    now_strin = now_str()[:8]
+    now_day = int(now_strin[-2:])
+    now_month = int(now_strin[4:6])
+
+    #смотрим, какие данные завтра есть
+    cur.execute("SELECT * from public.transaction_plan where date_plan >= '%(now_strin)s' and Extract(month from date_plan) = %(now_month)s and user_id = %(user_id)s" % {'now_strin' : now_strin , 'user_id' : user_id , 'now_month' : now_month} )
+
+    #получаем данные
+    df_transaction_plan = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #получаем ежемесячные данные
+    cur.execute("select * from public.month_transaction_plan where day >= %(now_day)s and user_id = %(user_id)s" % { 'now_day' : now_day , 'user_id' : user_id} )
+    df_transaction_month = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #формируем итог
+    df_transaction_plan = df_transaction_plan.append(df_transaction_month)
+
+    #если ничего нет - возвращаем ответ
+    if df_transaction_plan.shape[0] == 0:
+        cur.close()
+        return response
+    else:
+        cur.close()
+        
+    #достаем дни из разовых трат    
+    if df_transaction_plan['date_plan'].dtypes != 'O':
+        df_transaction_plan['day_month'] = df_transaction_plan['date_plan'].dt.day
+    else:
+        df_transaction_plan['day_month'] = df_transaction_plan['date_plan']
+
+    #формируем единую метку дней
+    day = []
+    for day1 , day2 in zip (df_transaction_plan['day'].values , df_transaction_plan['day_month'].values):
+        if np.isnan(day1):
+            day.append(int(day2))
+        else:
+            day.append(int(day1))
+            
+    df_transaction_plan['day'] = day   
+
+
+    df_transaction_plan.sort_values(by = ['day'] , inplace = True , ascending = True)
+
+    df_transaction_plan.reset_index(inplace = True)
+
+    df_transaction_plan.drop(labels = 'index' , axis = 1 , inplace = True)
+
+    month_names = {1 : 'январь'
+                  ,2 : 'февраль'
+                  ,3 : 'март'
+                  ,4 : 'апрель'
+                  ,5 : 'май'
+                  ,6 : 'июнь'
+                  ,7 : 'июль'
+                  ,8 : 'август'
+                  ,9 : 'сентябрь'
+                  ,10 : 'октябрь'
+                  ,11 : 'ноябрь'
+                  ,12 : 'декабрь'}
+
+    text = 'Вот список запланированных трат на %(month_name)s:\n\n' % {'month_name' : month_names[now_month]}
+
+    #формируем список
+    for row in df_transaction_plan.iterrows():
+        num = str(row[0]+1)
+        day = str(row[1][1])
+        transaction_name = str(row[1][5])
+        transaction_summa = str(int(row[1][4]))
+        text += num + ': ' + day + ' числа, ' + transaction_name + ', ' + transaction_summa + ' руб.\n'
+        
+        
+    text += '\nЧто-то нужно сделать, Владыка?'
+    reply_markup = {'keyboard': [['Изменить','Удалить'],['Добавить','меню']], 'resize_keyboard': True, 'one_time_keyboard': False}
+    system_message = 'Have reports' 
+
+    response['text'] = text
+    response['reply_markup'] = reply_markup
+    response['system_message'] = system_message
+
+    return response
