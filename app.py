@@ -391,10 +391,64 @@ def main():
                     traceback.print_exc()
                     text = 'мммм, чего то не пойму... Введите существующий номер плановой операции, указанной в списке'
                     reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
-                
-
-
-
+            #1->1->3->3
+            if command == 'Изменить':
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
+                text = 'Оки-доки! Напишите номер плановой операции, по которой нужно изменить дату!'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+            #1->1->3->3->1
+            elif state_info_1 == 'Изменить' and state_info_2 is None:
+                try:
+                    change_num = int(command)
+                    r = psql_methods.change_transaction_plan_1(chat_id, user_id ,change_num)
+                    transaction_type = r['system_message']
+                    text = r['text']
+                    reply_markup = reply_markup_main if r['reply_markup'] is None else r['reply_markup']
+                    if r['system_message'] != 'No report':
+                        r = psql_methods.insert_state_info(chat_id = chat_id , state_info = change_num , state_id = 2)
+                        r = psql_methods.insert_state_info(chat_id = chat_id , state_info = transaction_type , state_id = 3)
+                except:
+                    traceback.print_exc()
+                    text = 'Блин, ну нет такого номера... Введите существующий номер плановой операции, указанной в списке'
+                    reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+            #1->1->3->3->2
+            elif state_info_1 == 'Изменить' and state_info_3 is not None:
+                if state_info_3 == 'once':
+                    date_list = command.split('.')
+                    error = 0
+                    date_plan = ''
+                    if len(date_list) != 3:
+                        text = 'Некорректный формат, повторите ввод даты'   
+                        reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                    else:
+                        for date_part in date_list:
+                            try:
+                                if int(date_part) < 10 and len(date_part)==1:
+                                    date_part = '0' + date_part
+                                    date_plan = date_part + date_plan
+                                else:
+                                    date_plan = date_part + date_plan
+                            except:
+                                error = 1
+                        
+                        if error == 1:
+                            text = 'Не могу разобрать... Проверьте формат и повторите ввод даты.'
+                            reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                        else:
+                            r = psql_methods.change_transaction_plan_2(chat_id = chat_id, user_id = user_id , change_num = state_info_2 , type = state_info_3 , date_plan = date_plan)
+                            text = 'Перенесено на ' + command + ' хозяин!'
+                            reply_markup = reply_markup_main
+                            r = psql_methods.clear_state(chat_id = chat_id)
+                elif state_info_3 == 'monthly':
+                    date_plan = int(command)
+                    if date_plan > 28:
+                        text = 'оу оу, Дата не влазит, введите от 1 до 28'   
+                        reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                    else:
+                        r = psql_methods.change_transaction_plan_2(chat_id = chat_id, user_id = user_id , change_num = state_info_2 , type = state_info_3 , date_plan = date_plan)
+                        text = 'Перенесено на ' + command + ' хозяин!'
+                        reply_markup = reply_markup_main
+                        r = psql_methods.clear_state(chat_id = chat_id)
 
 
 

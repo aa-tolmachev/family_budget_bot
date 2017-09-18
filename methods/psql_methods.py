@@ -583,7 +583,7 @@ def delete_transaction_plan(chat_id = None  , user_id = None , delete_num = None
     #если ничего нет - возвращаем ответ
     if df_transaction_plan.shape[0] == 0:
         cur.close()
-        #return response
+        return response
     else:
         cur.close()
         
@@ -635,5 +635,174 @@ def delete_transaction_plan(chat_id = None  , user_id = None , delete_num = None
 
     response['text'] = text
     response['reply_markup'] = reply_markup
+
+    return response
+
+
+
+
+#Изменение даты плановой операции 1
+def change_transaction_plan_1(chat_id = None  , user_id = None , change_num = None):
+    #формат ответа
+    response = {'status' : 200
+                ,'report' : 'change_transaction_plan'
+                ,'system_message' : 'No report'
+                ,'text' : None
+                ,'reply_markup' : None
+                }
+
+    # создаем запрос
+    cur = conn.cursor()
+
+    now_strin = now_str()[:8]
+    now_day = int(now_strin[-2:])
+    now_month = int(now_strin[4:6])
+
+    #смотрим, какие данные завтра есть
+    cur.execute("SELECT * from public.transaction_plan where date_plan >= '%(now_strin)s' and Extract(month from date_plan) = %(now_month)s and user_id = %(user_id)s" % {'now_strin' : now_strin , 'user_id' : user_id , 'now_month' : now_month} )
+
+    #получаем данные
+    df_transaction_plan = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #получаем ежемесячные данные
+    cur.execute("select * from public.month_transaction_plan where day >= %(now_day)s and user_id = %(user_id)s" % { 'now_day' : now_day , 'user_id' : user_id} )
+    df_transaction_month = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #формируем итог
+    df_transaction_plan = df_transaction_plan.append(df_transaction_month)
+
+    #если ничего нет - возвращаем ответ
+    if df_transaction_plan.shape[0] == 0:
+        cur.close()
+        return response
+    else:
+        cur.close()
+
+    #достаем дни из разовых трат    
+    if df_transaction_plan['date_plan'].dtypes != 'O':
+        df_transaction_plan['day_month'] = df_transaction_plan['date_plan'].dt.day
+    else:
+        df_transaction_plan['day_month'] = df_transaction_plan['date_plan']
+
+    #формируем единую метку дней
+    day = []
+    for day1 , day2 in zip (df_transaction_plan['day'].values , df_transaction_plan['day_month'].values):
+        if np.isnan(day1):
+            day.append(int(day2))
+        else:
+            day.append(int(day1))
+
+    df_transaction_plan['day'] = day   
+
+
+    df_transaction_plan.sort_values(by = ['day'] , inplace = True , ascending = True)
+
+    df_transaction_plan.reset_index(inplace = True)
+
+    df_transaction_plan.drop(labels = 'index' , axis = 1 , inplace = True)
+
+    #выбираем нужный элемент
+    if df_transaction_plan.shape[0] >= change_num:
+        dict_change_plan = df_transaction_plan.iloc[change_num-1]
+        if np.isnan(dict_change_plan['day_month']):
+            text = 'Так так, посмотрим. Эта ежемесячная операция, укажите, в какой день напоминать от 1 до 28'
+            reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+            response['system_message'] = 'monthly'
+        else:
+            text = 'Хм, разовая операция, на какую дату перенести? В формате -> 22.03.1990'
+            reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True} 
+            response['system_message'] = 'once'
+            
+    else:
+        text = 'А у тебя не очень хорошо с целыми числами... Введи существующий номер операции'
+        reply_markup =  {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+        
+        
+
+    response['text'] = text
+    response['reply_markup'] = reply_markup
+
+    return response
+
+
+#Изменение даты плановой операции 2
+def change_transaction_plan_2(chat_id = None  , user_id = None , change_num = None , type = None , date_plan = None):
+    change_num = int(change_num)
+
+    #формат ответа
+    response = {'status' : 200
+                ,'report' : 'change_transaction_plan'
+                ,'system_message' : 'No report'
+                ,'text' : None
+                ,'reply_markup' : None
+                }
+
+    # создаем запрос
+    cur = conn.cursor()
+
+    now_strin = now_str()[:8]
+    now_day = int(now_strin[-2:])
+    now_month = int(now_strin[4:6])
+
+    #смотрим, какие данные завтра есть
+    cur.execute("SELECT * from public.transaction_plan where date_plan >= '%(now_strin)s' and Extract(month from date_plan) = %(now_month)s and user_id = %(user_id)s" % {'now_strin' : now_strin , 'user_id' : user_id , 'now_month' : now_month} )
+
+    #получаем данные
+    df_transaction_plan = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #получаем ежемесячные данные
+    cur.execute("select * from public.month_transaction_plan where day >= %(now_day)s and user_id = %(user_id)s" % { 'now_day' : now_day , 'user_id' : user_id} )
+    df_transaction_month = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #формируем итог
+    df_transaction_plan = df_transaction_plan.append(df_transaction_month)
+
+    #если ничего нет - возвращаем ответ
+    if df_transaction_plan.shape[0] == 0:
+        cur.close()
+        return response
+    else:
+        cur.close()
+
+    #достаем дни из разовых трат    
+    if df_transaction_plan['date_plan'].dtypes != 'O':
+        df_transaction_plan['day_month'] = df_transaction_plan['date_plan'].dt.day
+    else:
+        df_transaction_plan['day_month'] = df_transaction_plan['date_plan']
+
+    #формируем единую метку дней
+    day = []
+    for day1 , day2 in zip (df_transaction_plan['day'].values , df_transaction_plan['day_month'].values):
+        if np.isnan(day1):
+            day.append(int(day2))
+        else:
+            day.append(int(day1))
+
+    df_transaction_plan['day'] = day   
+
+
+    df_transaction_plan.sort_values(by = ['day'] , inplace = True , ascending = True)
+
+    df_transaction_plan.reset_index(inplace = True)
+
+    df_transaction_plan.drop(labels = 'index' , axis = 1 , inplace = True)
+
+    dict_change_plan = df_transaction_plan.iloc[change_num-1]
+        
+
+    if np.isnan(dict_change_plan['day_month']):
+        cur = conn.cursor()
+        id_change = dict_change_plan['id']
+        cur.execute("update public.month_transaction_plan set day = %(date_plan)s where id = %(id_change)s" % {'date_plan' : int(date_plan) , 'id_change' : id_change} )
+        conn.commit()
+        cur.close()
+    else:
+        cur = conn.cursor()
+        id_change = dict_change_plan['id']
+        cur.execute("update public.transaction_plan set date_plan = '%(date_plan)s' where id = %(id_change)s" % {'date_plan' : date_plan , 'id_change' : id_change} )
+        conn.commit()
+        cur.close()
+        
+        
 
     return response
