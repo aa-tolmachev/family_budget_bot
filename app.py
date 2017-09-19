@@ -439,6 +439,7 @@ def main():
                             text = 'Перенесено на ' + command + ' хозяин!'
                             reply_markup = reply_markup_main
                             r = psql_methods.clear_state(chat_id = chat_id)
+                            r = psql_methods.last_state(chat_id,'/main')
                 elif state_info_3 == 'monthly':
                     date_plan = int(command)
                     if date_plan > 28:
@@ -449,6 +450,7 @@ def main():
                         text = 'Перенесено на ' + command + ' хозяин!'
                         reply_markup = reply_markup_main
                         r = psql_methods.clear_state(chat_id = chat_id)
+                        r = psql_methods.last_state(chat_id,'/main')
 
 
 
