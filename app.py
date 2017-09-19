@@ -145,7 +145,7 @@ def main():
             text = 'Привет!' +  emoji('фанфары') + '\n'
             text += 'Что я понимаю: \n'
             text += 'Кошелек - работа с кошельком, формирование фактических и плановых трат \n'
-            text += 'Отчеты - различный отчеты с интересной информацией \n'
+            text += 'Отчеты - различные отчеты с интересной информацией \n'
             text += 'Инвестиции - информация по курсам валют, личным вкладам, инвестиционным портфелям \n'
             reply_markup = reply_markup_main
 
@@ -193,6 +193,7 @@ def main():
                     text = r['text']
                     reply_markup = r['reply_markup']
                 else:
+                    r = psql_methods.last_state(chat_id,'/main')
                     text = 'В текущем месяце нет плановых трат...'
                     reply_markup = reply_markup_main
 
