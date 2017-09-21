@@ -496,13 +496,71 @@ def main():
 
 
         #4 - Дела
-        #4-> начало работы с делами
         elif 'Дела' in command:
-            text = 'погоди погоди, торопыга, думаю над этим ^_^'
-            reply_markup = reply_markup_main
+            r = psql_methods.last_state(chat_id,command)
+            text = 'Да да, слушаю. Что с делами?'
+            reply_markup = {'keyboard': [['Записать дело'],['Список дел']], 'resize_keyboard': True, 'one_time_keyboard': False}
+
+        #4-> начало работы с делами
+        elif last_state == 'Дела':
+            #4->1 Записать дело - название
+            if command == 'Записать дело':
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
+                text = 'Напишите, что за дело? Я запишу это, чтобы Вам не держать это в голове!'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+            
+            #4->1->1 указываем дату
+            elif state_info_1 == 'Записать дело' and state_info_2 is None:
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 2)
+                text = 'Ясно-понятно, запомнил! Укажите, в какую дату необходимо сделать данное дело? В формате -> 22.03.1990'
+                reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+
+
+            #4->1->1->1 записываем!
+            elif state_info_1 == 'Записать дело' and state_info_3 is None:
+                date_list = command.split('.')
+                error = 0
+                date_plan = ''
+                if len(date_list) != 3:
+                    text = 'Некорректный формат, повторите ввод даты'   
+                    reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                else:
+                    for date_part in date_list:
+                        try:
+                            if int(date_part) < 10 and len(date_part)==1:
+                                date_part = '0' + date_part
+                                date_plan = date_part + date_plan
+                            else:
+                                date_plan = date_part + date_plan
+                        except:
+                            error = 1
+                    
+                    if error == 1:
+                        text = 'Не могу разобрать... Проверьте формат и повторите ввод даты.'
+                        reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
+                    else:
+                        r = psql_methods.add_task(chat_id = chat_id  , date_plan = date_plan , dict_user_data = dict_user_data)
+                        text = r['text']
+                        reply_markup = reply_markup_main if r['reply_markup'] is None else r['reply_markup']
+                        r = psql_methods.clear_state(chat_id = chat_id)
+                        r = psql_methods.last_state(chat_id,'/main')
+            #4->2 Сисок дел - выбор
+            elif command == 'Список дел':
+                r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
+                text = 'На какой период интересует?'
+                reply_markup = {'keyboard': [['На дату'],['На текущую неделю'],['На текущий месяц']], 'resize_keyboard': True, 'one_time_keyboard': False}
+            #4->2->1 Получаем данные
+            elif state_info_1 == 'Список дел' and state_info_2 is None:
+                text = 'аха, ниче не готово...'
+                reply_markup = reply_markup_main
+                #r = psql_methods.check_task(chat_id = chat_id  , date_plan = date_plan , dict_user_data = dict_user_data)
+                #доработать
+                r = psql_methods.clear_state(chat_id = chat_id)
+                r = psql_methods.last_state(chat_id,'/main')
 
 
 
+        #-> хз што это
         else:
             text = 'Неизвестная команда, для списка команд выбирите команду /help'
             reply_markup = reply_markup_main

@@ -806,3 +806,34 @@ def change_transaction_plan_2(chat_id = None  , user_id = None , change_num = No
         
 
     return response
+
+
+
+def add_task(chat_id = None  , date_plan = None , dict_user_data = None):
+
+    # создаем запрос
+    cur = conn.cursor()
+    #формат ответа
+    response = {'status' : 200
+                ,'report' : 'add_task'
+                ,'system_message' : 'No report'
+                ,'text' : None
+                ,'reply_markup' : None
+                }
+    try:
+        #получаем входные данные
+        task_name = dict_user_data['state_info_2']
+        user_id = dict_user_data['user_id']
+        
+
+        #получаем время записи
+        cur.execute("INSERT INTO public.tasks (user_id ,task , date_task , flg_done) VALUES (%(user_id)s,'%(task_name)s','%(date_plan)s',False)" % {'user_id' : user_id , 'task_name' : task_name , 'date_plan' : date_plan }  )
+        conn.commit()
+        cur.close()
+        response['text'] = 'Записано! Я напомню Вам о данном деле, можете не переживать.'
+    except:
+        cur.close()
+        response['text'] = 'Что-то пошло не так, не получилось записать...'
+
+
+    return response
