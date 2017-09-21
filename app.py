@@ -27,7 +27,7 @@ api = access.api()
 application = Flask(__name__)  # Change assignment here
 
 #главное меню делаем глобальной переменной
-g_reply_markup_main = {'keyboard': [['Кошелек'],['Отчеты'],['Инвестиции']], 'resize_keyboard': True, 'one_time_keyboard': False}
+g_reply_markup_main = {'keyboard': [['Отчеты','Кошелек'],['Инвестиции','Дела']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
 
 # создаем webhook
@@ -145,6 +145,7 @@ def main():
             text = 'Привет!' +  emoji('фанфары') + '\n'
             text += 'Что я понимаю: \n'
             text += 'Кошелек - работа с кошельком, формирование фактических и плановых трат \n'
+            text += 'Дела - запланированный перечень задач, планы, напоминание и тому подобное \n'
             text += 'Отчеты - различные отчеты с интересной информацией \n'
             text += 'Инвестиции - информация по курсам валют, личным вкладам, инвестиционным портфелям \n'
             reply_markup = reply_markup_main
@@ -493,6 +494,12 @@ def main():
             text = str(ETH_USD) + ' $ за дозу эфирчика...'
             reply_markup = reply_markup_main
 
+
+        #4 - Дела
+        #4-> начало работы с делами
+        elif 'Дела' in command:
+            text = 'погоди погоди, торопыга, думаю над этим ^_^'
+            reply_markup = reply_markup_main
 
 
 
