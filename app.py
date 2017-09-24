@@ -548,12 +548,12 @@ def main():
             elif command == 'Список дел':
                 r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
                 text = 'На какой период интересует?'
-                reply_markup = {'keyboard': [['На дату'],['На текущую неделю'],['На текущий месяц']], 'resize_keyboard': True, 'one_time_keyboard': False}
+                reply_markup = {'keyboard': [['На сегодня'],['На текущую неделю'],['На текущий месяц']], 'resize_keyboard': True, 'one_time_keyboard': False}
             #4->2->1 Получаем данные
             elif state_info_1 == 'Список дел' and state_info_2 is None:
-                text = 'аха, ниче не готово...'
-                reply_markup = reply_markup_main
-                #r = psql_methods.check_task(chat_id = chat_id  , date_plan = date_plan , dict_user_data = dict_user_data)
+                r = psql_methods.check_task(chat_id = chat_id  , command = command , dict_user_data = dict_user_data)
+                text = r['text']
+                reply_markup = reply_markup_main if r['reply_markup'] is None else r['reply_markup']
                 #доработать
                 r = psql_methods.clear_state(chat_id = chat_id)
                 r = psql_methods.last_state(chat_id,'/main')

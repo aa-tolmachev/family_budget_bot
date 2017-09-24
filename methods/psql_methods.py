@@ -837,3 +837,54 @@ def add_task(chat_id = None  , date_plan = None , dict_user_data = None):
 
 
     return response
+
+def check_task(chat_id = None  , command = None , dict_user_data = None):
+    # создаем запрос
+    cur = conn.cursor()
+    #формат ответа
+    response = {'status' : 200
+                ,'report' : 'check_task'
+                ,'system_message' : 'No report'
+                ,'text' : None
+                ,'reply_markup' : None
+                }
+    try:
+        #получаем входные данные
+        user_id = dict_user_data['user_id']
+        #получаем данные
+        if command == 'На сегодня':
+            cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('day', now()) and date_task < date_trunc('day', now()) +  interval '1 day'" % {  'user_id' : user_id} )
+        elif command == 'На текущую неделю':
+            cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('week', now()) and date_task < date_trunc('week', now()) + interval '7 day'" % {  'user_id' : user_id} )
+        elif command == 'На текущий месяц':
+            cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('month', now()) and date_task < date_trunc('month', now()) + interval '1 month'" % {  'user_id' : user_id} )
+
+        df_plan_tasks = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+        cur.close()
+
+        #смотрим df по запросу и готовим текст
+        if df_plan_tasks.shape[0] == 0:
+            response['text'] = command + ' дел нет.'
+        else:
+            text = command + ' следующие дела:\n\n'
+            num = 1
+            for row in df_plan_tasks.iterrows():
+                text += str(num) + ': ' + row[1]['task'] + ' ' + row[1]['date_task'].strftime('%d.%m.%Y') + '\n'
+                num += 1
+                
+            #здесь добавить предложение что-то сделать
+            response['text'] = text
+
+
+
+
+    except:
+        cur.close()
+        response['text'] = 'Что-то пошло не так, не получилось записать...'
+
+    return response
+
+
+
+
