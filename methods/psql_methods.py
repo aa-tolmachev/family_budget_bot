@@ -859,7 +859,7 @@ def check_task(chat_id = None  , command = None , dict_user_data = None):
         elif command == 'На текущий месяц':
             cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('month', now()) and date_task < date_trunc('month', now()) + interval '1 month'" % {  'user_id' : user_id} )
 
-        df_plan_tasks = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+        df_plan_tasks = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description]).sort_values(by='date_task' , ascending=True)
 
         cur.close()
 
@@ -870,9 +870,13 @@ def check_task(chat_id = None  , command = None , dict_user_data = None):
             text = command + ' следующие дела:\n\n'
             num = 1
             for row in df_plan_tasks.iterrows():
-                text += str(num) + ': ' + row[1]['task'] + ' ' + row[1]['date_task'].strftime('%d.%m.%Y') + '\n'
+                if command != 'На сегодня':
+                    date_row_task = row[1]['date_task'].strftime('%d.%m.%Y')
+                else:
+                    date_row_task = ''
+                text += str(num) + ': ' + row[1]['task'] + ' ' + date_row_task + '\n'
                 num += 1
-                
+
             #здесь добавить предложение что-то сделать
             response['text'] = text
 
