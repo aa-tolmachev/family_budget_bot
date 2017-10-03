@@ -36,6 +36,13 @@ def tomorrow_str_func():
     return tomorrow_str
 
 
+#текущая дата без часов минут
+def today_str_func():
+    today = datetime.now()
+    today_str = str(today.year)+str(today.month if today.month >= 10 else  '0'+str(today.month))+str(today.day if today.day >= 10 else  '0'+str(today.day)) 
+    return today_str
+
+
 #основная функция приема с worker_1
 def main_woker_1( model = None):
     if model is None:
@@ -53,7 +60,10 @@ def main_woker_1( model = None):
         if model == 'tomorrow_expense':
             r = tomorrow_expense()
             return r
-            
+        #сообщение о задачах на сегодня - направляем на всех пользователей
+        elif model == 'today_tasks':
+            r = today_tasks()
+            return r   
 
 
     return 200
@@ -144,3 +154,76 @@ def tomorrow_expense():
 
 
 
+#отчет - плановые задачи на сегодня -  today_tasks
+def today_tasks():
+    #формируем ответ
+    response = {'status' : 200
+                ,'report' : 'today_tasks'
+                ,'message' : 'No reports'
+                ,'tomorrow_messages' : []
+                }
+    #получаем дату в строке завтрашнего дня
+    today_str = today_str_func()
+
+
+    # создаем запрос
+    cur = conn.cursor()
+    #смотрим, какие данные завтра есть
+    cur.execute("SELECT * from public.tasks where date_task = '%(today_str)s'" % {'today_str' : today_str} )
+
+    #получаем данные
+    df_today_tasks = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+
+    if df_today_tasks.shape[0] == 0:
+        cur.close()
+        return response
+    else:
+        cur.execute("select id , chat_id from public.user" )
+        df_user = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+        cur.close()
+
+
+    #подгатавливаем лист с сообщениями
+    list_messages = []
+    #делаем выборку из пользователей, по кому нужно направить ответ
+    list_user_id = list(df_today_tasks['user_id'].unique())
+    df_user_id = df_user[df_user.id.isin(list_user_id)][:]
+
+
+    #проходим по ним и заполняем листр завтрашних плановых операций
+    for i,row in df_user_id.iterrows():
+        #получаем данные пользователя
+        user_id = row.id
+        chat_id = row.chat_id
+        #получаем сообщения по нему
+        interest_info = df_today_tasks[(df_today_tasks.user_id == user_id)][['task']][:]
+        list_interest_info = list(interest_info.T.to_dict('list').values())
+        
+        text = 'Сегодня есть запланированные дела: \n\n'
+        num = 1
+        for task_plan in list_interest_info:
+            task_name = task_plan[0]
+            text += str(num) + ': ' + task_name + '\n'
+            
+            num += 1
+            
+        text += '\n Удачи в сегодняшнем дне, ковбой!'
+            
+        
+        
+        
+        #формируем итоговый словарь по пользователю
+        user_dict_tomorrow_messages = {'user_id' : user_id
+                                      ,'chat_id' : chat_id
+                                      ,'message' : text}
+        #добавляем инфо
+        list_messages.append(user_dict_tomorrow_messages)
+        
+
+    response['system_message'] = 'Have reports'
+    response['user_messages'] = list_messages
+
+
+    #реализовать обработку response в app и отправку сообщений пользователям
+    return response
