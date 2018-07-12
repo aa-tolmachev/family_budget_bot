@@ -13,5 +13,4 @@ telepot
 python-telegram-bot
 telebot
 pyTelegramBotAPI
-tkinter
 matplotlib

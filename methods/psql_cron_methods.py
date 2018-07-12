@@ -289,6 +289,8 @@ def prev_month_complete_tasks():
     res = df_plan_tasks.groupby(['YearMonth'])['id'].count()
     res_6 = res.sort_index(ascending = False).head(6).sort_index(ascending = True)
 
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     plt.style.use('ggplot')
 
