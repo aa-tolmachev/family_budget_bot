@@ -53,9 +53,13 @@ def testtest():
 
     r = psql_cron_methods.prev_month_complete_tasks()
     chat_id = 84723474
-    send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo = r, reply_markup = None)
+    #send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo = r, reply_markup = None)
 
     r.close()
+
+    data = {'chat_id': 84723474}
+    files = {'photo': ('to1.png', open('to1.png', "rb"))}
+    requests.post(api+token + '/sendPhoto', data=data, files=files)
     os.remove("to1.png")
     return "Hello World!"
 
