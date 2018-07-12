@@ -85,12 +85,12 @@ def send_photo(chat_id = None , photo = None , reply_markup = None):
     #если не направляем кнопки
     if reply_markup is None:
         params = {'chat_id' : chat_id
-                ,'photo' : text
+                ,'photo' : photo
         }
     #если хотим отправить кнопки
     else:
         params = {'chat_id' : chat_id
-        ,'photo' : text
+        ,'photo' : photo
         ,'reply_markup': reply_markup
         }
     r = requests.post(url,
