@@ -47,6 +47,18 @@ def webhook():
 def hello():
     return "Hello World!"
 
+# тестовый вывод картинки
+@application.route("/тест")  
+def testtest():
+
+    r = psql_cron_methods.prev_month_complete_tasks()
+    chat_id = 84723474
+    send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo = r, reply_markup = None)
+
+    r.close()
+    os.remove("to1.png")
+    return "Hello World!"
+
 #тест крона
 @application.route('/cron_test', methods=['GET', 'POST'])
 def cron_test():

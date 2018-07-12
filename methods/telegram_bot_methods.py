@@ -78,3 +78,24 @@ def send_location(chat_id = None , longitude = None , latitude = None):
     return send_result
 
 
+#функция отправки фото
+def send_photo(chat_id = None , photo = None , reply_markup = None):
+    url = api + token + '/sendMessage'
+    
+    #если не направляем кнопки
+    if reply_markup is None:
+        params = {'chat_id' : chat_id
+                ,'photo' : text
+        }
+    #если хотим отправить кнопки
+    else:
+        params = {'chat_id' : chat_id
+        ,'photo' : text
+        ,'reply_markup': reply_markup
+        }
+    r = requests.post(url,
+                      json=params)
+
+    send_result = '200'
+
+    return send_result

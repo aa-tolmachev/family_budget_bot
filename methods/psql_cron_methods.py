@@ -227,3 +227,136 @@ def today_tasks():
 
     #реализовать обработку response в app и отправку сообщений пользователям
     return response
+
+
+
+#todo - переделать не на одного меня а массово на всех пользователей
+#отчет дела за прошлый месяц как сделаны
+def prev_month_complete_tasks():
+    user_id = 13
+    command = 'На текущий месяц'
+    command = ''
+    #формат ответа
+    response = {'status' : 200
+                ,'report' : 'delete_transaction_plan'
+                ,'system_message' : 'No report'
+                ,'text' : None
+                ,'reply_markup' : None
+                }
+
+
+    # создаем запрос
+    cur = conn.cursor()
+    if command == 'На сегодня':
+        cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('day', now()) and date_task < date_trunc('day', now()) +  interval '1 day'" % {  'user_id' : user_id} )
+    elif command == 'На текущую неделю':
+        cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('week', now()) and date_task < date_trunc('week', now()) + interval '7 day'" % {  'user_id' : user_id} )
+    elif command == 'На текущий месяц':
+        cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('month', now()) and date_task < date_trunc('month', now()) + interval '1 month'" % {  'user_id' : user_id} )
+    else:
+        cur.execute("select * from public.tasks where  user_id = %(user_id)s " % {  'user_id' : user_id} )
+
+
+    df_plan_tasks = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description]).sort_values(by='date_task' , ascending=True)
+
+    cur.close() 
+
+    if df_plan_tasks.shape[0] == 0:
+        response['text'] = command + ' дел нет.'
+    else:
+        text = command + ' следующие дела:\n\n'
+        num = 1
+        for row in df_plan_tasks.iterrows():
+            text += str(num) + ': ' + row[1]['task'] + ' ' + row[1]['date_task'].strftime('%d.%m.%Y') + '\n'
+            num += 1
+            
+            
+        response['text'] = text
+
+
+    text = command + ' следующие дела:\n\n'
+    num = 1
+    for row in df_plan_tasks.iterrows():
+        text += str(num) + ': ' + row[1]['task'] + ' ' + row[1]['date_task'].strftime('%d.%m.%Y') + '\n'
+
+        num += 1
+
+
+
+
+    df_plan_tasks['YearMonth'] = pd.to_datetime(df_plan_tasks['date_task']).map(lambda dt: dt.replace(day=1))
+
+    res = df_plan_tasks.groupby(['YearMonth'])['id'].count()
+    res_6 = res.sort_index(ascending = False).head(6).sort_index(ascending = True)
+
+    import matplotlib.pyplot as plt
+    plt.style.use('ggplot')
+
+    month_dict= {1:'Январь',
+                2:'Февраль',
+                3:'Март',
+                4:'Апрель',
+                5:'Май',
+                6:'Июнь',
+                7:'Июль',
+                8:'Август',
+                9:'Сентябрь',
+                10:'Октябрь',
+                11:'Ноябрь',
+                12:'Декабрь'}
+
+
+    res_6.index = [month_dict[x.month] for x in list(res_6.index)]
+
+
+    from dateutil.relativedelta import relativedelta
+    now_date = datetime.now()
+    next_date = datetime.now()+ relativedelta(months=1)
+    prev_date = datetime.now()- relativedelta(months=1)
+
+
+    now_year = now_date.year
+    now_month = now_date.month
+
+    prev_year = prev_date.year
+    prev_month = prev_date.month
+
+    datetime(now_year, now_month , 1).isocalendar()[1]
+
+
+
+    df_prev_month = df_plan_tasks[(df_plan_tasks['date_task'] >= datetime(prev_year, prev_month , 1))
+                 & (df_plan_tasks['date_task'] < datetime(now_year, now_month , 1))][:]
+
+    df_prev_month['n_week'] = [int(x.day / 7) + 1 for x in df_prev_month['date_task']]
+
+    res = df_prev_month.groupby(['n_week'])['id'].count()
+
+
+    cnt_missions = res.values
+    name_bars = list(res.index)
+    y_pos = np.arange(len(name_bars))
+
+
+    plt.bar(y_pos, cnt_missions, color = (0.2, 0.9, 0.7, 0.8) ,  edgecolor='gray')
+
+
+
+    plt.xlabel('неделя')
+    plt.ylabel('выполнено дел')
+
+
+    plt.ylim(0,50)
+
+
+    plt.xticks(y_pos, name_bars)
+
+    for a,b in zip(y_pos, cnt_missions): 
+        plt.text(a - 0.1, b + 1, str(b) , fontsize=11 , color = 'darkgreen')
+
+
+    plt.savefig('to1.png' ,facecolor='w', edgecolor='w')
+
+    x = open('to1.png', 'rb')
+
+    return x
