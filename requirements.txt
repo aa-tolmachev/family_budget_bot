@@ -13,4 +13,3 @@ telepot
 python-telegram-bot
 telebot
 pyTelegramBotAPI
-PIL
