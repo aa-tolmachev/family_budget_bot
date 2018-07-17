@@ -1,6 +1,7 @@
 import requests
 import access
 from methods.emoji import emoji
+from dicts import dict_dates
 import json
 from datetime import datetime
 from datetime import timedelta
@@ -65,7 +66,10 @@ def main_woker_1( model = None):
         elif model == 'today_tasks':
             r = today_tasks()
             return r   
-
+        #отчет о делах за предыдущий месяц
+        elif model = 'prev_month_complete_tasks':
+            r = prev_month_complete_tasks()
+            return r  
 
     return 200
 
@@ -231,135 +235,97 @@ def today_tasks():
 
 
 
-#todo - переделать не на одного меня а массово на всех пользователей
+
 #отчет дела за прошлый месяц как сделаны
 def prev_month_complete_tasks():
-    user_id = 13
-    command = 'На текущий месяц'
-    command = ''
-    #формат ответа
+    #формируем ответ
     response = {'status' : 200
-                ,'report' : 'delete_transaction_plan'
-                ,'system_message' : 'No report'
-                ,'text' : None
-                ,'reply_markup' : None
+                ,'report' : 'prev_month_complete_tasks'
+                ,'message' : 'No reports'
                 }
-
 
     # создаем запрос
     cur = conn.cursor()
-    if command == 'На сегодня':
-        cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('day', now()) and date_task < date_trunc('day', now()) +  interval '1 day'" % {  'user_id' : user_id} )
-    elif command == 'На текущую неделю':
-        cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('week', now()) and date_task < date_trunc('week', now()) + interval '7 day'" % {  'user_id' : user_id} )
-    elif command == 'На текущий месяц':
-        cur.execute("select * from public.tasks where  user_id = %(user_id)s and date_task >= date_trunc('month', now()) and date_task < date_trunc('month', now()) + interval '1 month'" % {  'user_id' : user_id} )
+    #смотрим, какие данные завтра есть
+    cur.execute("select * from public.tasks where date_task >= date_trunc('month',now()) - INTERVAL '1MONTH' and date_task < date_trunc('month',now())")
+
+    #получаем данные
+    df_prev_month_tasks = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+
+    if df_prev_month_tasks.shape[0] == 0:
+        cur.close()
+        return response
     else:
-        cur.execute("select * from public.tasks where  user_id = %(user_id)s " % {  'user_id' : user_id} )
+        cur.execute("select id , chat_id from public.user" )
+        df_user = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+        cur.close()
+        
+    #подгатавливаем лист с сообщениями
+    list_messages = []
+    #делаем выборку из пользователей, по кому нужно направить ответ
+    list_user_id = list(df_prev_month_tasks['user_id'].unique())
+    df_user_id = df_user[df_user.id.isin(list_user_id)][:]
+
+    #нумеруем недели для составления отчетов
+    df_prev_month_tasks['n_week'] = [int(x.day / 7) + 1 for x in df_prev_month_tasks['date_task']]
+
+    #получаем месяц, за который составляем отчет
+    month_num_to_names = dict_dates.month_num_to_names
+    prev_month = df_prev_month_tasks.date_task[0].month
+    prev_month = month_num_to_names[prev_month]
 
 
-    df_plan_tasks = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description]).sort_values(by='date_task' , ascending=True)
+    #проходим по ним и заполняем листр завтрашних плановых операций
+    for i,row in df_user_id.iterrows():
+        #получаем данные пользователя
+        user_id = row.id
+        chat_id = row.chat_id
+        #получаем данные по определенному пользователю
+        interest_info = df_prev_month_tasks[(df_prev_month_tasks.user_id == user_id)][:]
+        
+        #формируем серию с нужными данными для составления отчета
+        res = interest_info.groupby(['n_week'])['id'].count()
+        
+        #формируем отчет
+        cnt_missions = res.values
+        name_bars = list(res.index)
+        y_pos = np.arange(len(name_bars))
 
-    cur.close() 
+        plt.figure(figsize=(5,2.5))
+        plt.bar(y_pos, cnt_missions, color = (0.2, 0.9, 0.7, 0.8) ,  edgecolor='gray')
 
-    if df_plan_tasks.shape[0] == 0:
-        response['text'] = command + ' дел нет.'
-    else:
-        text = command + ' следующие дела:\n\n'
-        num = 1
-        for row in df_plan_tasks.iterrows():
-            text += str(num) + ': ' + row[1]['task'] + ' ' + row[1]['date_task'].strftime('%d.%m.%Y') + '\n'
-            num += 1
-            
-            
-        response['text'] = text
+        plt.xlabel(prev_month)
+        plt.ylabel('выполнено дел')
+        plt.ylim(0,50)
+        plt.xticks(y_pos, name_bars)
 
+        for a,b in zip(y_pos, cnt_missions): 
+            plt.text(a - 0.1, b + 1, str(b) , fontsize=11 , color = 'darkgreen')
 
-    text = command + ' следующие дела:\n\n'
-    num = 1
-    for row in df_plan_tasks.iterrows():
-        text += str(num) + ': ' + row[1]['task'] + ' ' + row[1]['date_task'].strftime('%d.%m.%Y') + '\n'
+        
+        #сохраняем картинки по отчетам
+        path = './images/prev_month_complete_tasks/'
+        full_path = path+str(user_id)+'.png'
+        plt.savefig(full_path ,facecolor='w', edgecolor='w')
 
-        num += 1
+        plt.show()
+        plt.close()
+        
+        #формируем текст для отчетика
+        all_month_tasks = sum(res.values)
+        text = 'Поглядим поглядим, %s сделано. Молодец, работай над собой!' % all_month_tasks
+        
+        #формируем итоговый словарь по пользователю по ответу
+        user_dict_tomorrow_messages = {'user_id' : user_id
+                                      ,'chat_id' : chat_id
+                                      ,'message' : text
+                                      ,'photo_path' : full_path}
+        #добавляем инфо в общей список сообщений
+        list_messages.append(user_dict_tomorrow_messages)
+        
+    #заполняем информацию по ответу
+    response['system_message'] = 'Have reports'
+    response['user_messages'] = list_messages
 
-
-
-
-    df_plan_tasks['YearMonth'] = pd.to_datetime(df_plan_tasks['date_task']).map(lambda dt: dt.replace(day=1))
-
-    res = df_plan_tasks.groupby(['YearMonth'])['id'].count()
-    res_6 = res.sort_index(ascending = False).head(6).sort_index(ascending = True)
-
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-    plt.style.use('ggplot')
-
-    month_dict= {1:'Январь',
-                2:'Февраль',
-                3:'Март',
-                4:'Апрель',
-                5:'Май',
-                6:'Июнь',
-                7:'Июль',
-                8:'Август',
-                9:'Сентябрь',
-                10:'Октябрь',
-                11:'Ноябрь',
-                12:'Декабрь'}
-
-
-    res_6.index = [month_dict[x.month] for x in list(res_6.index)]
-
-
-    from dateutil.relativedelta import relativedelta
-    now_date = datetime.now()
-    next_date = datetime.now()+ relativedelta(months=1)
-    prev_date = datetime.now()- relativedelta(months=1)
-
-
-    now_year = now_date.year
-    now_month = now_date.month
-
-    prev_year = prev_date.year
-    prev_month = prev_date.month
-
-    datetime(now_year, now_month , 1).isocalendar()[1]
-
-
-
-    df_prev_month = df_plan_tasks[(df_plan_tasks['date_task'] >= datetime(prev_year, prev_month , 1))
-                 & (df_plan_tasks['date_task'] < datetime(now_year, now_month , 1))][:]
-
-    df_prev_month['n_week'] = [int(x.day / 7) + 1 for x in df_prev_month['date_task']]
-
-    res = df_prev_month.groupby(['n_week'])['id'].count()
-
-
-    cnt_missions = res.values
-    name_bars = list(res.index)
-    y_pos = np.arange(len(name_bars))
-
-
-    plt.bar(y_pos, cnt_missions, color = (0.2, 0.9, 0.7, 0.8) ,  edgecolor='gray')
-
-
-
-    plt.xlabel('неделя')
-    plt.ylabel('выполнено дел')
-
-
-    plt.ylim(0,50)
-
-
-    plt.xticks(y_pos, name_bars)
-
-    for a,b in zip(y_pos, cnt_missions): 
-        plt.text(a - 0.1, b + 1, str(b) , fontsize=11 , color = 'darkgreen')
-
-
-    plt.savefig('to1.png' ,facecolor='w', edgecolor='w')
-
-    x = open('to1.png', 'rb')
-
-    return x
+    return response

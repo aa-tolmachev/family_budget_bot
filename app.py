@@ -47,7 +47,7 @@ def webhook():
 def hello():
     return "Hello World!"
 
-# тестовый вывод картинки
+# тестовый вывод картинки##################################
 @application.route("/тест")  
 def testtest():
 
@@ -56,12 +56,13 @@ def testtest():
     #send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo = r, reply_markup = None)
 
     r.close()
-
+    #вот эта штука работает
     data = {'chat_id': 84723474}
     files = {'photo': ('to1.png', open('to1.png', "rb"))}
     requests.post(api+token + '/sendPhoto', data=data, files=files)
     os.remove("to1.png")
     return "Hello World!"
+################################################################################################
 
 #тест крона
 @application.route('/cron_test', methods=['GET', 'POST'])
@@ -95,6 +96,10 @@ def cron_worker_1():
                     chat_id = str(message['chat_id'])
                     text = message['message']
                     send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup_main)
+                    #если к сообщению есть картинка, отправляем картинку
+                    if 'photo_path' in message.keys():
+                        photo_path = message['photo_path']
+                        send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo_path = photo_path)
 
 
 

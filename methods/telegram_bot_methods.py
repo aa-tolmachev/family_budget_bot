@@ -3,6 +3,7 @@ import access
 import json
 from datetime import datetime
 from time import sleep
+import os
 
 token = access.token()
 api = access.api()
@@ -77,24 +78,17 @@ def send_location(chat_id = None , longitude = None , latitude = None):
     
     return send_result
 
-
+#todo переделать под работающие условия
 #функция отправки фото
-def send_photo(chat_id = None , photo = None , reply_markup = None):
-    url = api + token + '/sendMessage'
+def send_photo(chat_id = None, photo_path = None):
+    url = api + token + '/sendPhoto'
     
-    #если не направляем кнопки
-    if reply_markup is None:
-        params = {'chat_id' : chat_id
-                ,'photo' : photo
-        }
-    #если хотим отправить кнопки
-    else:
-        params = {'chat_id' : chat_id
-        ,'photo' : photo
-        ,'reply_markup': reply_markup
-        }
-    r = requests.post(url,
-                      json=params)
+    data = {'chat_id': chat_id}
+    files = {'photo': (photo_path, open(photo_path, "rb"))}
+
+    requests.post(url, data=data, files=files)
+
+    os.remove(photo_path)
 
     send_result = '200'
 
