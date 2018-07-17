@@ -67,7 +67,7 @@ def main_woker_1( model = None):
             r = today_tasks()
             return r   
         #отчет о делах за предыдущий месяц
-        elif model = 'prev_month_complete_tasks':
+        elif model == 'prev_month_complete_tasks':
             r = prev_month_complete_tasks()
             return r  
 
