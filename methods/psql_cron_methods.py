@@ -318,7 +318,7 @@ def prev_month_complete_tasks():
         
         #формируем текст для отчетика
         all_month_tasks = sum(res.values)
-        text = 'Поглядим поглядим, %s сделано. Молодец, работай над собой!' % all_month_tasks
+        text = 'Поглядим поглядим, что там с делами в предыдущем месце... %s сделано! Молодец, работай над собой! КАМПАЙ!!!' % all_month_tasks
         
         #формируем итоговый словарь по пользователю по ответу
         user_dict_tomorrow_messages = {'user_id' : user_id
