@@ -177,11 +177,16 @@ def today_tasks():
 
     # создаем запрос
     cur = conn.cursor()
+
     #смотрим, какие данные завтра есть
     cur.execute("SELECT * from public.tasks where date_task = '%(today_str)s'" % {'today_str' : today_str} )
 
     #получаем данные
     df_today_tasks = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+    #смотрим, какой объем задач в среднем люди берут на себя в течение двух месяцев
+    cur.execute("select user_id         ,round(avg(cnt_tasks),0) + 1 as norm_task_in_day from ( select user_id      ,date_trunc('day',date_task)       ,count(id) as cnt_tasks from public.tasks where date_task >= date_trunc('month',now()) - INTERVAL '2MONTH' and date_task <= now() group by 1, date_trunc('day',date_task) ) as f group by user_id"  )
+    df_user_avg_day_task = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
 
 
     if df_today_tasks.shape[0] == 0:
@@ -216,8 +221,21 @@ def today_tasks():
             text += str(num) + ': ' + task_name + '\n'
             
             num += 1
-            
-        text += '\n Удачи в сегодняшнем дне, ковбой!'
+         
+         
+       
+        if user_id in df_user_avg_day_task.user_id.values:
+            avg_tasks_in_day = df_user_avg_day_task[(df_user_avg_day_task.user_id == user_id)].norm_task_in_day.values[0]
+            if avg_tasks_in_day > num:
+                text += '\n Ты не осилишь больше {0} задач, может перенесешь чего-нибудь, алло?'.format(avg_tasks_in_day)
+            else:
+                text += '\n Удачи в сегодняшнем дне, ковбой!'  
+
+        else:
+            text += '\n Удачи в сегодняшнем дне, ковбой!'  
+        
+
+        
             
         
         
