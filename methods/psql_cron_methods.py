@@ -227,7 +227,7 @@ def today_tasks():
         if user_id in df_user_avg_day_task.user_id.values:
             avg_tasks_in_day = df_user_avg_day_task[(df_user_avg_day_task.user_id == user_id)].norm_task_in_day.values[0]
             if avg_tasks_in_day < num - 1:
-                text += '\n Ты не осилишь больше {0} задач, может перенесешь чего-нибудь, алло?'.format(avg_tasks_in_day)
+                text += '\n Уверены в своих силах? В среднем вы делаете в день задач около {0}, подумайте, может перенесем что-нибудь на другой день?'.format(avg_tasks_in_day)
             else:
                 text += '\n Удачи в сегодняшнем дне, ковбой!'  
 

@@ -9,6 +9,7 @@ import psycopg2
 from pandas import DataFrame
 import pandas as pd
 import numpy as np
+import re
 
 token = access.token()
 api = access.api()
@@ -825,9 +826,15 @@ def add_task(chat_id = None  , date_plan = None , dict_user_data = None):
         task_name = dict_user_data['state_info_2']
         user_id = dict_user_data['user_id']
         
+        #проверяем, важность этого дела, если первый символ без пробела '!' значит дело важное, иначе нет
+        is_main_task = task_name.replace(' ','')[0] == "!"
 
         #получаем время записи
-        cur.execute("INSERT INTO public.tasks (user_id ,task , date_task , flg_done) VALUES (%(user_id)s,'%(task_name)s','%(date_plan)s',False)" % {'user_id' : user_id , 'task_name' : task_name , 'date_plan' : date_plan }  )
+        #если дело важное записываем флаг flg_main = True иначе flg_main = False
+        if is_main_task:
+            cur.execute("INSERT INTO public.tasks (user_id ,task , date_task , flg_done, flg_main) VALUES (%(user_id)s,'%(task_name)s','%(date_plan)s',False,True)" % {'user_id' : user_id , 'task_name' : task_name , 'date_plan' : date_plan }  )
+        else:
+            cur.execute("INSERT INTO public.tasks (user_id ,task , date_task , flg_done, flg_main) VALUES (%(user_id)s,'%(task_name)s','%(date_plan)s',False,False)" % {'user_id' : user_id , 'task_name' : task_name , 'date_plan' : date_plan }  )
         conn.commit()
         cur.close()
         response['text'] = 'Записано! Я напомню Вам о данном деле, можете не переживать.'

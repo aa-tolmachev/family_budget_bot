@@ -512,7 +512,7 @@ def main():
             #4->1 Записать дело - название
             if command == 'Записать дело':
                 r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
-                text = 'Напишите, что за дело? Я запишу это, чтобы Вам не держать это в голове!'
+                text = 'Напишите, что за дело? Я запишу это, чтобы Вам не держать это в голове! Укажите "!" в начале и я пойму, что это очень важное дело.'
                 reply_markup = {'keyboard': [['меню']], 'resize_keyboard': True, 'one_time_keyboard': True}
             
             #4->1->1 указываем дату
