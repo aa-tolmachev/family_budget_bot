@@ -154,6 +154,7 @@ def main():
             text += 'Дела - запланированный перечень задач, планы, напоминание и тому подобное \n'
             text += 'Отчеты - различные отчеты с интересной информацией \n'
             text += 'Инвестиции - информация по курсам валют, личным вкладам, инвестиционным портфелям \n'
+            text += "Если что-то пошло не так - напиши 'меню' и ты вернешься на главное меню\n"
             reply_markup = reply_markup_main
 
         elif 'wallet_action' in command:
@@ -598,5 +599,6 @@ def main():
 
 if __name__ == "__main__":
     port = int(os.getenv('PORT', 5000))
-    application.run(debug=False, port=port, host='0.0.0.0')
+    application.run(debug=False, port=port, host='0.0.0.0' , threaded=True)
+
 
