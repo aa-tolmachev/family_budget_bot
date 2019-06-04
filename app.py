@@ -497,8 +497,12 @@ def main():
         #3 - курсы
         #здесь запосы к криптовалютам
         elif 'Инвестиции' in command:
-            ETH_USD = crypto.crypto_curse()
-            text = str(ETH_USD) + ' $ за дозу эфирчика...'
+            crypto_price_dict = crypto.crypto_curse()
+
+            text = str(crypto_price_dict['ETH_USD']) + ' $ за ETH... \n'
+            text += str(crypto_price_dict['LTC_USD']) + ' $ за LTC... \n'
+            text += str(crypto_price_dict['EOS_USD']) + ' $ за EOS... \n'
+
             reply_markup = reply_markup_main
 
 
