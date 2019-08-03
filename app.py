@@ -147,7 +147,7 @@ def main():
             reply_markup = reply_markup_main
 
         else:
-            meta_path = router.route.meta()
+            meta_path = router.route.meta(chat_id = chat_id , command = command ,dict_user_data= dict_user_data)
 
 
 
