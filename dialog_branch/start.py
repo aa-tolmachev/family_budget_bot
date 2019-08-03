@@ -25,3 +25,13 @@ def start_help(chat_id = None, command = None):
     text += "Если что-то пошло не так - напиши 'меню' и ты вернешься на главное меню\n"
 
     return text
+
+
+
+#возврат в главное меню
+def menu(chat_id=None , command=None):
+    r = psql_methods.last_state(chat_id,command)
+    r = psql_methods.clear_state(chat_id = chat_id)
+    text = 'Окей!' + emoji('thumbs_up') + ' Что хотим сделать?'
+
+    return text

@@ -19,6 +19,8 @@ from methods import reply
 from dialog_branch import *
 import dialog_branch as dibr
 
+from router import *
+import router as router
 
 
 token = access.token()
@@ -116,7 +118,6 @@ def main():
         #получаем список трат
         keyboard_expense , list_expense_types = reply.list_expense_types()
 
-
         #получаем текущее состояние
         dict_user_data = psql_methods.user_data(chat_id)
         last_state = dict_user_data['last_state']
@@ -129,28 +130,26 @@ def main():
         personal_wallet_id = dict_user_data['personal_wallet_id']
 
 
-        #в зависимости от команды выбираем действие
+        #список первоочередных команд из любой точки
         if 'start' in command:
             text , reply_markup = dibr.start.welcome(chat_id = chat_id , json_update = json_update)
-
 
         elif 'Создать кошелек' in command:
             text = dibr.create.wallet_create(chat_id = chat_id , command = command)
             reply_markup = reply_markup_main
 
-
         elif 'help' in command:
             text = dibr.start.start_help(chat_id = chat_id , command = command)
             reply_markup = reply_markup_main
 
-
-        
-        #возвращение в главное меню
         elif 'меню' in command:
-            r = psql_methods.last_state(chat_id,command)
-            r = psql_methods.clear_state(chat_id = chat_id)
-            text = 'Окей!' + emoji('thumbs_up') + ' Что хотим сделать?'
+            text = dibr.start.menu(chat_id = chat_id , command = command)
             reply_markup = reply_markup_main
+
+        else:
+            meta_path = router.route.meta()
+
+
 
 
         ############################################################
@@ -158,7 +157,7 @@ def main():
         ############################################################
         #1 кошелек
         #1->1 - выбор действия кошелька
-        elif 'Кошелек' in command:
+        if 'Кошелек' in command:
             r = psql_methods.last_state(chat_id,command)
             text = 'Что сделать с кошельком?'
             reply_markup = {'keyboard': [['Траты факт - добавить'],['Траты план - добавить'],['Траты план - список']], 'resize_keyboard': True, 'one_time_keyboard': False}
