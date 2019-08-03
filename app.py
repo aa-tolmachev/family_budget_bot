@@ -16,6 +16,8 @@ from methods import psql_methods
 from methods import psql_cron_methods
 from methods import reply
 
+from dialog_branch import *
+import dialog_branch as dibr
 
 
 
@@ -85,9 +87,6 @@ def cron_worker_1():
                     if 'photo_path' in message.keys():
                         photo_path = message['photo_path']
                         send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo_path = photo_path)
-
-
-
         return "!", 200
     except:
         #тест - для тестирования
@@ -132,36 +131,19 @@ def main():
 
         #в зависимости от команды выбираем действие
         if 'start' in command:
-            r = psql_methods.new_user(chat_id , json_update)
-            text = emoji('фанфары') + 'Добрый день! \n' 
-            text += 'Я веду домашний бюджет и напоминаю об операциях в течение месяца. \n'
-            text += 'Я развиваюсь в свободное время, потом будет интереснее. \n'
-            text += 'Сначала заведите свой кошелек и забудьте о том, чтобы держать бюджет семьи в голове!' + emoji('банкноты')
-            reply_markup = {'keyboard': [['Создать кошелек']], 'resize_keyboard': True, 'one_time_keyboard': False}
+            text , reply_markup = dibr.start.welcome(chat_id = chat_id , json_update = json_update)
+
 
         elif 'Создать кошелек' in command:
-            r = psql_methods.last_state(chat_id,command)
-            r = psql_methods.make_wallet(chat_id)
-            text = r['text']
-            #reply_markup = r['reply_markup']
+            text = dibr.create.wallet_create(chat_id = chat_id , command = command)
             reply_markup = reply_markup_main
+
 
         elif 'help' in command:
-            r = psql_methods.last_state(chat_id,command)
-            text = 'Привет!' +  emoji('фанфары') + '\n'
-            text += 'Что я понимаю: \n'
-            text += 'Кошелек - работа с кошельком, формирование фактических и плановых трат \n'
-            text += 'Дела - запланированный перечень задач, планы, напоминание и тому подобное \n'
-            text += 'Отчеты - различные отчеты с интересной информацией \n'
-            text += 'Инвестиции - информация по курсам валют, личным вкладам, инвестиционным портфелям \n'
-            text += "Если что-то пошло не так - напиши 'меню' и ты вернешься на главное меню\n"
+            text = dibr.start.start_help(chat_id = chat_id , command = command)
             reply_markup = reply_markup_main
 
-        elif 'wallet_action' in command:
-            r = psql_methods.last_state(chat_id,command)
-            text = 'Что нужно сделать с личным кошельком? \n'
-            text += '/expense_add - добавить фактическую операцию'
-            reply_markup = {'keyboard': [['/expense_add'],['/main']], 'resize_keyboard': True, 'one_time_keyboard': False}
+
         
         #возвращение в главное меню
         elif 'меню' in command:
