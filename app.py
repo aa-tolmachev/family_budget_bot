@@ -130,6 +130,17 @@ def main():
         personal_wallet_id = dict_user_data['personal_wallet_id']
 
 
+        #определяем направление ветки разговора
+        meta_path = router.route.meta(chat_id = chat_id , command = command ,dict_user_data= dict_user_data)
+
+
+        #направляем на запуск ветки разговора
+        #router.route.make_dialog_branch()
+
+
+
+
+
         #список первоочередных команд из любой точки
         if 'start' in command:
             text , reply_markup = dibr.start.welcome(chat_id = chat_id , json_update = json_update)
@@ -146,8 +157,8 @@ def main():
             text = dibr.start.menu(chat_id = chat_id , command = command)
             reply_markup = reply_markup_main
 
-        else:
-            meta_path = router.route.meta(chat_id = chat_id , command = command ,dict_user_data= dict_user_data)
+
+
 
 
 
