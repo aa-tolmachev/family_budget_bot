@@ -4,6 +4,8 @@ from dicts import meta_info
 
 from methods import reply
 
+from methods import crypto
+
 def main(command = None , chat_id = None, dict_user_data = None,json_update = None):
 
     text = 'непонимайт...'
