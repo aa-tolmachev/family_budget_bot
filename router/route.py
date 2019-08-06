@@ -67,10 +67,12 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
 #направляем на нужную ветку диалога
 def make_dialog_branch(meta_path= None, chat_id= None, command= None , dict_user_data= None):
 
-    text = 'Не понимаю о чем вы...'
+    #-> хз што это
+    text = 'Неизвестная команда, для списка команд выбирите команду /help'
     reply_markup = meta_info.reply_markup_main
 
 
+    #смотрим по веткам разговора
     if meta_path == 'start':
         text , reply_markup = dibr.start.main(command = command , chat_id = chat_id , json_update = json_update)
     elif meta_path == 'primary':

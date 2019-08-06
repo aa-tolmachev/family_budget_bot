@@ -135,32 +135,17 @@ def main():
         #определяем направление ветки разговора
         meta_path = router.route.meta(chat_id = chat_id , command = command ,dict_user_data= dict_user_data)
 
-
         #направляем на запуск ветки разговора
         text , reply_markup = router.route.make_dialog_branch(meta_path= meta_path, chat_id= chat_id, command= command , dict_user_data= dict_user_data)
 
-
-
-        #-> хз што это
-        else:
-            text = 'Неизвестная команда, для списка команд выбирите команду /help'
-            reply_markup = reply_markup_main
-
-
         #отправляем сообщение
         send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup)
-
-
-
-
-            
+  
         return "!", 200
     except:
 
         #тест - для тестирования
         traceback.print_exc()
-
-
 
         return "!", 200
 
