@@ -73,7 +73,16 @@ def make_dialog_branch(meta_path= None, chat_id= None, command= None , dict_user
 
     if meta_path == 'start':
         text , reply_markup = dibr.start.main(command = command , chat_id = chat_id , json_update = json_update)
-
+    elif meta_path == 'primary':
+        text , reply_markup = dibr.primary.main(command = command , chat_id = chat_id , json_update = json_update)
+    elif meta_path == 'wallet':
+        text , reply_markup = dibr.wallet.main(command = command , chat_id = chat_id , json_update = json_update)
+    elif meta_path == 'report':
+        text , reply_markup = dibr.report.main(command = command , chat_id = chat_id , json_update = json_update)
+    elif meta_path == 'invest':
+        text , reply_markup = dibr.invest.main(command = command , chat_id = chat_id , json_update = json_update)
+    elif meta_path == 'task':
+        text , reply_markup = dibr.task.main(command = command , chat_id = chat_id , json_update = json_update)
 
     return text , reply_markup
 
