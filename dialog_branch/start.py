@@ -30,7 +30,13 @@ def start_help(chat_id = None, command = None):
 
     return text
 
+#создание кошелька для пользователя
+def wallet_create(chat_id = None , command = None):
+    r = psql_methods.last_state(chat_id,command)
+    r = psql_methods.make_wallet(chat_id)
+    text = r['text']
 
+    return text
 
 #возврат в главное меню
 def menu(chat_id=None , command=None):
@@ -45,21 +51,14 @@ def menu(chat_id=None , command=None):
 def main(command = None , chat_id = None , json_update = None):
 
 
-    #список первоочередных команд из любой точки
+    #список стартовых команд 
     if 'start' in command:
         text , reply_markup = welcome(chat_id = chat_id , json_update = json_update)
 
-    #elif 'Создать кошелек' in command:
-    #    text = dibr.create.wallet_create(chat_id = chat_id , command = command)
-    #    reply_markup = meta_info.reply_markup_main
-
-    elif 'help' in command:
-        text = start_help(chat_id = chat_id , command = command)
+    elif 'Создать кошелек' in command:
+        text = wallet_create(chat_id = chat_id , command = command)
         reply_markup = meta_info.reply_markup_main
 
-    elif 'меню' in command:
-        text = menu(chat_id = chat_id , command = command)
-        reply_markup = meta_info.reply_markup_main
 
     return text , reply_markup
 
