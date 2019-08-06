@@ -41,7 +41,7 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
         meta_path = 'primary'
 
     #определяем стартовые команды команды из любого места
-    if re.match(start_commands, command):
+    elif re.match(start_commands, command):
         meta_path = 'start'
 
     #определяем кошелек
