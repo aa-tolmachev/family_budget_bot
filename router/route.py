@@ -24,8 +24,11 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
 
 
     #массивы значений комманд
-    primary_commands = ['start' , 'Создать кошелек' , 'help' , 'меню']
+    primary_commands = ['help' , 'меню']
     primary_commands = "(.*" + ".*)|(.*".join(primary_commands) + ".*)"
+
+    start_commands = ['start' , 'Создать кошелек' ]
+    start_commands = "(.*" + ".*)|(.*".join(primary_commands) + ".*)"
 
     #массивы значений последних состояний
     wallet_last_states = ['Кошелек', 'Траты факт - добавить', 'Траты план - добавить', 'Траты план - список']
@@ -36,6 +39,10 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
     #определяем первоочередные команды из любого места
     if re.match(primary_commands, command):
         meta_path = 'primary'
+
+    #определяем стартовые команды команды из любого места
+    if re.match(start_commands, command):
+        meta_path = 'start'
 
     #определяем кошелек
     elif 'Кошелек' in command or last_state in wallet_last_states:
@@ -64,7 +71,7 @@ def make_dialog_branch(meta_path= None, chat_id= None, command= None , dict_user
     reply_markup = meta_info.reply_markup_main
 
 
-    if meta_path == 'primary':
+    if meta_path == 'start':
         text , reply_markup = dibr.start.main(command = command , chat_id = chat_id , json_update = json_update)
 
 

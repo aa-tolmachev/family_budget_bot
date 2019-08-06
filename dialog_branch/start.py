@@ -3,8 +3,6 @@ from methods.emoji import emoji
 
 from dicts import meta_info
 
-from dialog_branch import *
-import dialog_branch as dibr
 
 
 #первое знакомство с пользователем
@@ -51,9 +49,9 @@ def main(command = None , chat_id = None , json_update = None):
     if 'start' in command:
         text , reply_markup = welcome(chat_id = chat_id , json_update = json_update)
 
-    elif 'Создать кошелек' in command:
-        text = dibr.create.wallet_create(chat_id = chat_id , command = command)
-        reply_markup = meta_info.reply_markup_main
+    #elif 'Создать кошелек' in command:
+    #    text = dibr.create.wallet_create(chat_id = chat_id , command = command)
+    #    reply_markup = meta_info.reply_markup_main
 
     elif 'help' in command:
         text = start_help(chat_id = chat_id , command = command)
