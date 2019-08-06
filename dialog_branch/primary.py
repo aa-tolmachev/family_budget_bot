@@ -33,9 +33,7 @@ def main(command = None , chat_id = None , json_update = None):
 
 
     #список первоочередных команд из любой точки
-
-
-    elif 'help' in command:
+    if 'help' in command:
         text = start_help(chat_id = chat_id , command = command)
         reply_markup = meta_info.reply_markup_main
 
