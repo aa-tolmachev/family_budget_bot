@@ -5,6 +5,9 @@ from methods import psql_methods
 from dialog_branch import *
 import dialog_branch as dibr
 
+from dicts import meta_info
+
+
 #определяем мета направление, предопределяющее все дальнейшие последовательныые движения
 def meta(chat_id = None , command = None ,dict_user_data= None):
 
@@ -55,7 +58,23 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
 
 
 #направляем на нужную ветку диалога
-#def make_dialog_branch()
+def make_dialog_branch(meta_path= None, chat_id= None, command= None , dict_user_data= None):
+
+    text = 'Не понимаю о чем вы...'
+    reply_markup = meta_info.reply_markup_main
+
+
+    if meta_path == 'primary':
+        text , reply_markup = dibr.start.main(command = command , chat_id = chat_id , json_update = json_update)
+
+
+    return text , reply_markup
+
+
+
+
+
+
 
 
 

@@ -16,6 +16,8 @@ from methods import psql_methods
 from methods import psql_cron_methods
 from methods import reply
 
+from dicts import meta_info
+
 from dialog_branch import *
 import dialog_branch as dibr
 
@@ -31,7 +33,7 @@ api = access.api()
 application = Flask(__name__)  # Change assignment here
 
 #главное меню делаем глобальной переменной
-g_reply_markup_main = {'keyboard': [['Отчеты','Кошелек'],['Инвестиции','Дела']], 'resize_keyboard': True, 'one_time_keyboard': False}
+g_reply_markup_main = meta_info.reply_markup_main
 
 
 # создаем webhook
@@ -135,7 +137,7 @@ def main():
 
 
         #направляем на запуск ветки разговора
-        #router.route.make_dialog_branch()
+        t , m router.route.make_dialog_branch(meta_path= meta_path, chat_id= chat_id, command= command , dict_user_data= dict_user_data)
 
 
 
