@@ -40,25 +40,7 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
     if re.match(primary_commands, command):
         meta_path = 'primary'
 
-    #определяем стартовые команды команды из любого места
-    elif re.match(start_commands, command):
-        meta_path = 'start'
 
-    #определяем кошелек
-    elif 'Кошелек' in command or last_state in wallet_last_states:
-        meta_path = 'wallet'
-    
-    #определяем отчеты
-    elif 'Отчеты' in command or last_state in report_last_states:
-        meta_path = 'report'
-
-    #определяем инвестиции
-    elif 'Инвестиции' in command or last_state in invest_last_states:
-        meta_path = 'invest'
-
-    #определяем дела
-    elif 'Дела' in command or last_state in task_last_states:
-        meta_path = 'task'
 
     return meta_path
 
