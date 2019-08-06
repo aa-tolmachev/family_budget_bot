@@ -28,7 +28,7 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
     primary_commands = "(.*" + ".*)|(.*".join(primary_commands) + ".*)"
 
     start_commands = ['start' , 'Создать кошелек' ]
-    start_commands = "(.*" + ".*)|(.*".join(primary_commands) + ".*)"
+    start_commands = "(.*" + ".*)|(.*".join(start_commands) + ".*)"
 
     #массивы значений последних состояний
     wallet_last_states = ['Кошелек', 'Траты факт - добавить', 'Траты план - добавить', 'Траты план - список']
@@ -44,7 +44,21 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
     elif re.match(start_commands, command):
         meta_path = 'start'
 
+    #определяем кошелек
+    elif 'Кошелек' in command or last_state in wallet_last_states:
+        meta_path = 'wallet'
+    
+    #определяем отчеты
+    elif 'Отчеты' in command or last_state in report_last_states:
+        meta_path = 'report'
 
+    #определяем инвестиции
+    elif 'Инвестиции' in command or last_state in invest_last_states:
+        meta_path = 'invest'
+
+    #определяем дела
+    elif 'Дела' in command or last_state in task_last_states:
+        meta_path = 'task'
 
     return meta_path
 
