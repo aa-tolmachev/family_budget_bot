@@ -137,7 +137,7 @@ def main():
 
 
         #направляем на запуск ветки разговора
-        t , m router.route.make_dialog_branch(meta_path= meta_path, chat_id= chat_id, command= command , dict_user_data= dict_user_data)
+        t , m = router.route.make_dialog_branch(meta_path= meta_path, chat_id= chat_id, command= command , dict_user_data= dict_user_data)
 
 
 
