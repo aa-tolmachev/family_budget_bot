@@ -40,6 +40,10 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
     if re.match(primary_commands, command):
         meta_path = 'primary'
 
+    #определяем стартовые команды команды из любого места
+    elif re.match(start_commands, command):
+        meta_path = 'start'
+
 
 
     return meta_path
