@@ -48,7 +48,7 @@ def menu(chat_id=None , command=None):
 
 
 #основная функция определения нужных движений далее
-def main(command = None , chat_id = None , json_update = None):
+def main(command = None , chat_id = None , json_update = None, dict_user_data = None):
 
 
     #список стартовых команд 

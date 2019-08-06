@@ -4,7 +4,7 @@ from dicts import meta_info
 
 from methods import reply
 
-def main(command = None , chat_id = None, dict_user_data = None):
+def main(command = None , chat_id = None, dict_user_data = None,json_update = None):
 
     text = 'непонимайт...'
     reply_markup = meta_info.reply_markup_main
