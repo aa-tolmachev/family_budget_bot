@@ -5,6 +5,7 @@ from flask import make_response
 import os
 import json
 from pandas import DataFrame
+import numpy as np
 import traceback
 
 from methods import access
@@ -53,6 +54,43 @@ def webhook():
 def hello():
     return "Hello World!"
 
+# тестовый вывод полученных извне сообщений
+@application.route("/external_receive" , methods=['GET', 'POST'])  
+def external_receive():
+    try:
+        #пока в качестве теста делаем проверку на возможность торговать
+        #потом переделать подумать по нормальному
+        getData = request.get_data()
+        json_params = json.loads(getData) 
+        
+        lazy_df = pd.DataFrame(json_params)
+
+        text = 'Вероятности ставок: \n'
+
+        for i, row in lazy_df.iterrows():
+            par_name = row['par_name']
+            last_price = str(row['deal_last'] )
+            prob_price = str(np.round(row['deal_last'] * 1.015 , 2) )
+            cur_state = str(row['cur_state'])
+            factor_prob_up = row['cur_state_factor_up_prob']
+            price_prob_up = row['cur_state_price_up_prob']
+            
+            text += 'crypto: {0} , cur_state: {1} , last_price: {2} , stop_loss: {3} , price_prob: {4}% , factor_prob:{5}%\n\n'.format(par_name 
+                                                                                                                                     , cur_state
+                                                                                                                                    ,last_price
+                                                                                                                                    ,prob_price
+                                                                                                                                    ,int(price_prob_up*100) if price_prob_up != 'unknown' else 'unknown' 
+                                                                                                                                      ,int(factor_prob_up*100) if factor_prob_up != 'unknown' else 'unknown' )
+
+        chat_id = 84723474
+        send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = None)
+
+
+        return "!", 200
+    except:
+        #тест - для тестирования
+        traceback.print_exc()
+        return "!", 200
 
 
 #тест крона
