@@ -7,6 +7,7 @@ import json
 from pandas import DataFrame
 import numpy as np
 import traceback
+from ast import literal_eval
 
 from methods import access
 from methods import crypto
@@ -62,8 +63,9 @@ def external_receive():
         #потом переделать подумать по нормальному
         getData = request.get_data()
         json_params = json.loads(getData) 
-        print(json_params)
-        print(type(json_params))
+        json_params = literal_eval(json_params)
+
+
         lazy_df = DataFrame(json_params)
 
         text = 'Вероятности ставок: \n'
