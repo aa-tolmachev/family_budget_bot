@@ -59,6 +59,9 @@ def hello():
 @application.route("/external_receive" , methods=['GET', 'POST'])  
 def external_receive():
     try:
+        i = 1
+        if i == 1:
+            return "!", 200
         #пока в качестве теста делаем проверку на возможность торговать
         #потом переделать подумать по нормальному
         getData = request.get_data()
