@@ -939,7 +939,7 @@ def move_to_tomorrow(chat_id = None , dict_user_data = None):
         user_id = dict_user_data['user_id']
         
         #переносим все неважные дела на завтра
-        cur.execute("update tasks set date_task = '%(tomorrow_str)s' where user_id = %(user_id)s and date_task = '%(today_str)s' and flg_main is True" % {'user_id' : user_id  , 'tomorrow_str' : tomorrow_str , 'today_str' : today_str})
+        cur.execute("update tasks set date_task = '%(tomorrow_str)s' where user_id = %(user_id)s and date_task = '%(today_str)s' and flg_main is False" % {'user_id' : user_id  , 'tomorrow_str' : tomorrow_str , 'today_str' : today_str})
 
         conn.commit()
         cur.close()
