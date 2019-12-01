@@ -133,6 +133,10 @@ def cron_worker_1():
                     #отправляем сообщение
                     chat_id = str(message['chat_id'])
                     text = message['message']
+                    #проверяем, есть ли кастомные кнопки
+                    if 'reply_markup' in message.keys():
+                        reply_markup_main = message['reply_markup']
+
                     send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = reply_markup_main)
                     #если к сообщению есть картинка, отправляем картинку
                     if 'photo_path' in message.keys():

@@ -35,6 +35,7 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
     report_last_states = ['Отчеты']
     invest_last_states = []
     task_last_states = ['Дела']
+    non_important_move_last_states = ['Перенеси неважные на завтра']
 
     #определяем первоочередные команды из любого места
     if re.match(primary_commands, command):
@@ -59,6 +60,10 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
     #определяем дела
     elif 'Дела' in command or last_state in task_last_states:
         meta_path = 'task'
+
+    #определяем перенос на завтра неважных дел
+    elif 'Перенеси неважные на завтра' in command or last_state in non_important_move_last_states:
+        meta_path = 'move_from_today'
 
     return meta_path
 
@@ -85,6 +90,8 @@ def make_dialog_branch(meta_path= None, chat_id= None, command= None , dict_user
         text , reply_markup = dibr.invest.main(command = command , chat_id = chat_id , json_update = json_update, dict_user_data = dict_user_data)
     elif meta_path == 'task':
         text , reply_markup = dibr.task.main(command = command , chat_id = chat_id , json_update = json_update, dict_user_data = dict_user_data)
+    elif meta_path = 'move_from_today':
+        text , reply_markup = dibr.move_from_today.main(command = command , chat_id = chat_id , json_update = json_update, dict_user_data = dict_user_data)
 
     return text , reply_markup
 

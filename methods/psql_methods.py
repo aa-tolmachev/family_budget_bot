@@ -11,6 +11,8 @@ import pandas as pd
 import numpy as np
 import re
 
+from dicts import meta_info
+
 token = access.token()
 api = access.api()
 d_google_maps_api = access.google_maps_api_key()
@@ -26,6 +28,20 @@ def now_str():
     now = datetime.now()
     now_str = str(now.year)+str(now.month if now.month >= 10 else  '0'+str(now.month))+str(now.day if now.day >= 10 else  '0'+str(now.day)) +' '+str(now.hour if now.hour >= 10 else  '0'+str(now.hour)) + str(now.minute if now.minute >= 10 else  '0'+str(now.minute)) + str(now.second if now.second >= 10 else  '0'+str(now.second))
     return now_str
+
+
+#завтрашная дата без часов минут
+def tomorrow_str_func():
+    tomorrow = datetime.now()+ timedelta(days=1)
+    tomorrow_str = str(tomorrow.year)+str(tomorrow.month if tomorrow.month >= 10 else  '0'+str(tomorrow.month))+str(tomorrow.day if tomorrow.day >= 10 else  '0'+str(tomorrow.day)) 
+    return tomorrow_str
+
+
+#текущая дата без часов минут
+def today_str_func():
+    today = datetime.now()
+    today_str = str(today.year)+str(today.month if today.month >= 10 else  '0'+str(today.month))+str(today.day if today.day >= 10 else  '0'+str(today.day)) 
+    return today_str
 
 
 #регистрируем нового пользователя
@@ -886,6 +902,7 @@ def check_task(chat_id = None  , command = None , dict_user_data = None):
 
             #здесь добавить предложение что-то сделать
             response['text'] = text
+            response['reply_markup'] = meta_info.markup_non_important_to_tommorow
 
 
 
@@ -897,5 +914,41 @@ def check_task(chat_id = None  , command = None , dict_user_data = None):
     return response
 
 
+
+def move_to_tomorrow(chat_id = None , dict_user_data = None):
+
+
+    #получаем дату в строке завтрашнего дня
+    tomorrow_str = tomorrow_str_func()
+    #получаем дату в строке завтрашнего дня
+    today_str = today_str_func()
+
+
+
+    # создаем запрос
+    cur = conn.cursor()
+    #формат ответа
+    response = {'status' : 200
+                ,'report' : 'move_to_tomorrow'
+                ,'system_message' : 'No report'
+                ,'text' : None
+                ,'reply_markup' : None
+                }
+    try:
+        #получаем входные данные
+        user_id = dict_user_data['user_id']
+        
+        #переносим все неважные дела на завтра
+        cur.execute("update tasks set date_task = '%(tomorrow_str)s' where user_id = %(user_id)s and date_task = '%(today_str)s' and flg_main is True" % {'user_id' : user_id  , 'tomorrow_str' : tomorrow_str , 'today_str' : today_str})
+
+        conn.commit()
+        cur.close()
+        response['text'] = 'Неважные дела пересены на завтра, расслабтесь сегодня! ' + emoji('руки_вверх') + emoji('руки_вверх') + emoji('руки_вверх')
+    except:
+        cur.close()
+        response['text'] = 'Что-то пошло не так, не получилось записать...'
+
+
+    return response
 
 

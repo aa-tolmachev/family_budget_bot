@@ -17,6 +17,11 @@ import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
 
+from dicts import meta_info
+
+#главное меню делаем глобальной переменной
+g_reply_markup_main = meta_info.reply_markup_main
+
 
 
 token = access.token()
@@ -171,9 +176,16 @@ def today_tasks():
                 ,'message' : 'No reports'
                 ,'tomorrow_messages' : []
                 }
+    #главное меню
+    global g_reply_markup_main
+    reply_markup_main = g_reply_markup_main
+
+
     #получаем дату в строке завтрашнего дня
     today_str = today_str_func()
 
+    #получаем дату завтрашнего дня для sql запроса
+    tomorrow_str = tomorrow_str_func()
 
     # создаем запрос
     cur = conn.cursor()
@@ -223,11 +235,12 @@ def today_tasks():
             num += 1
          
          
-       
+        update_task_dates = False
         if user_id in df_user_avg_day_task.user_id.values:
             avg_tasks_in_day = df_user_avg_day_task[(df_user_avg_day_task.user_id == user_id)].norm_task_in_day.values[0]
             if avg_tasks_in_day < num - 1:
                 text += '\n Уверены в своих силах? В среднем вы делаете в день задач около {0}, подумайте, может перенесем что-нибудь на другой день?'.format(avg_tasks_in_day)
+                update_task_dates = True
             else:
                 text += '\n Удачи в сегодняшнем дне, ковбой!'  
 
@@ -236,14 +249,17 @@ def today_tasks():
         
 
         
-            
-        
-        
-        
         #формируем итоговый словарь по пользователю
         user_dict_tomorrow_messages = {'user_id' : user_id
                                       ,'chat_id' : chat_id
-                                      ,'message' : text}
+                                      ,'message' : text
+                                      }
+
+        #Перенос неважных дел на завтра
+        if update_task_dates:
+            markup_non_important_to_tommorow = meta_info.markup_non_important_to_tommorow
+            user_dict_tomorrow_messages['reply_markup'] = markup_non_important_to_tommorow
+
         #добавляем инфо
         list_messages.append(user_dict_tomorrow_messages)
         
