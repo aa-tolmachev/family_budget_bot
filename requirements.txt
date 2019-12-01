@@ -2,7 +2,7 @@ httplib2
 pandas
 datetime
 dj-database-url==0.4.1
-Flask==0.12
+Flask==1.0
 Django==1.11
 gunicorn==19.6.0
 psycopg2==2.8.1
