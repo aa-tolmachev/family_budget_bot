@@ -3,7 +3,7 @@ pandas
 datetime
 dj-database-url==0.4.1
 Flask==0.12
-Django==1.11
+Django==2.2.24
 gunicorn==20.0.4
 psycopg2==2.8.1
 whitenoise==3.3.0
