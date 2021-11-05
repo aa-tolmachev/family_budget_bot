@@ -545,11 +545,11 @@ def list_transaction_plan(chat_id = None  , user_id = None ):
     text = 'Вот список запланированных трат на %(month_name)s:\n\n' % {'month_name' : month_names[now_month]}
 
     #формируем список
-    for row in df_transaction_plan.iterrows():
-        num = str(row[0]+1)
-        day = str(row[1][1])
-        transaction_name = str(row[1][4])
-        transaction_summa = str(int(row[1][5]))
+    for i,row in df_transaction_plan.iterrows():
+        num = str(i+1)
+        day = str(row['day'])
+        transaction_name = str(row['transaction_name'])
+        transaction_summa = str(int(row['summa']))
         text += num + ': ' + day + ' числа, ' + transaction_name + ', ' + transaction_summa + ' руб.\n'
         
         
