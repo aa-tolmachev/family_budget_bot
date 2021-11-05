@@ -112,6 +112,8 @@ def main():
     try:
         json_update = json.loads(request.get_data())
 
+        print(json_update)
+
 
         #Изначально для отправки кнопки пустые
         reply_markup = None
