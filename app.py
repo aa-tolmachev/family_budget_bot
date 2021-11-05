@@ -85,6 +85,8 @@ def cron_worker_1():
             if r['system_message'] == 'Have reports':
                 list_messages = r['user_messages']
                 for message in list_messages:
+                    reply_markup_main = g_reply_markup_main
+
                     #отправляем сообщение
                     chat_id = str(message['chat_id'])
                     text = message['message']
