@@ -56,52 +56,6 @@ def webhook():
 def hello():
     return "Hello World!"
 
-# тестовый вывод полученных извне сообщений
-@application.route("/external_receive" , methods=['GET', 'POST'])  
-def external_receive():
-    try:
-        i = 1
-        if i == 1:
-            return "!", 200
-        #пока в качестве теста делаем проверку на возможность торговать
-        #потом переделать подумать по нормальному
-        getData = request.get_data()
-        json_params = json.loads(getData) 
-        json_params = literal_eval(json_params)
-
-
-        lazy_df = DataFrame(json_params)
-
-        text = 'Вероятности ставок: \n'
-
-        for i, row in lazy_df.iterrows():
-            if row['cur_state_factor_up_prob'] != 'unknown' and row['cur_state_price_up_prob'] != 'unknown':
-                if row['cur_state'] <= 0.98 or row['cur_state_factor_up_prob'] > 0.8 or row['cur_state_price_up_prob'] > 0.8:
-                    par_name = row['par_name']
-                    last_price = str(row['deal_last'] )
-                    prob_price = str(np.round(row['deal_last'] * 1.015 , 2) )
-                    cur_state = str(row['cur_state'])
-                    factor_prob_up = row['cur_state_factor_up_prob']
-                    price_prob_up = row['cur_state_price_up_prob']
-
-                    text += 'crypto: {0} , cur_state: {1} , last_price: {2} , stop_loss: {3} , price_prob: {4}% , factor_prob:{5}%\n\n'.format(par_name 
-                                                                                                                                             , cur_state
-                                                                                                                                            ,last_price
-                                                                                                                                            ,prob_price
-                                                                                                                                            ,int(price_prob_up*100) if price_prob_up != 'unknown' else 'unknown' 
-                                                                                                                                              ,int(factor_prob_up*100) if factor_prob_up != 'unknown' else 'unknown' )
-        
-        if text != 'Вероятности ставок: \n':
-            chat_id = 84723474
-            send_result = telegram_bot_methods.send_message(chat_id = chat_id, text = text, reply_markup = None)
-
-
-        return "!", 200
-    except:
-        #тест - для тестирования
-        traceback.print_exc()
-        return "!", 200
-
 
 #тест крона
 @application.route('/cron_test', methods=['GET', 'POST'])
