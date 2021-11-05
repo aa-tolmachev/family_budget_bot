@@ -1,22 +1,14 @@
-from flask import Flask
-from flask import request
-import requests
-from flask import make_response
-import os
-import json
-from pandas import DataFrame
-import numpy as np
-import traceback
-from ast import literal_eval
+"""Flask App Project."""
+
+from flask import Flask, jsonify
+app = Flask(__name__)
 
 
-application = Flask(__name__)  # Change assignment here
-
-# тестовый вывод
-@application.route("/")  
+@app.route('/')
 def hello():
     return "Hello World!"
 
 
 if __name__ == '__main__':
-    application.run()
+    app.run()
+
