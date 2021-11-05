@@ -1,15 +1,22 @@
-"""Flask App Project."""
+from flask import Flask
+from flask import request
+import requests
+from flask import make_response
+import os
+import json
+from pandas import DataFrame
+import numpy as np
+import traceback
+from ast import literal_eval
 
-from flask import Flask, jsonify
-app = Flask(__name__)
 
+application = Flask(__name__)  # Change assignment here
 
 # тестовый вывод
-@app.route("/")  
+@application.route("/")  
 def hello():
     return "Hello World!"
 
 
-if __name__ == "__main__":
-    port = int(os.getenv('PORT', 5000))
-    application.run(debug=False, port=port, host='0.0.0.0' , threaded=True)
+if __name__ == '__main__':
+    application.run()
