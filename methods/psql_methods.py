@@ -548,8 +548,8 @@ def list_transaction_plan(chat_id = None  , user_id = None ):
     for row in df_transaction_plan.iterrows():
         num = str(row[0]+1)
         day = str(row[1][1])
-        transaction_name = str(row[1][5])
-        transaction_summa = str(int(row[1][4]))
+        transaction_name = str(row[1][4])
+        transaction_summa = str(int(row[1][5]))
         text += num + ': ' + day + ' числа, ' + transaction_name + ', ' + transaction_summa + ' руб.\n'
         
         
