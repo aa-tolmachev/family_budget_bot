@@ -1,5 +1,6 @@
 from methods import psql_methods
 from methods.emoji import emoji
+from methods import telegram_bot_methods
 
 from dicts import meta_info
 
@@ -15,6 +16,11 @@ def integrations(chat_id = None, command = None):
     text += 'Заходи по ссылке и авторизуйся - https://todoist.com/app/today \n'
     text += 'скрин 1 - сверху справа зайди в интеграции \n'
     text += 'скрин 2 - в разделе интеграции найди API token - его нужно скопировать и отправить мне (как позже)\n'
+
+    full_path = './images/integration_todoist/todoist_1.png'
+    send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo_path = photo_path)
+    full_path = './images/integration_todoist/todoist_2.png'
+    send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo_path = photo_path)
 
     return text
     
