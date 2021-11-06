@@ -5,6 +5,21 @@ from dicts import meta_info
 
 
 
+#список доступных интеграций
+def integrations(chat_id = None, command = None):
+    r = psql_methods.last_state(chat_id,command)
+    text = 'Сейчас у нас появилась интеграция с ToDoist ола-ла!!!' + emoji('фанфары') + emoji('фанфары')+ '\n'
+    text += 'Удобство - я автоматически буду проверять ToDoist - напоминать тебе в удобное время, планировать задачи в течение дня, помогать приоритезировать. \n\n'
+
+    text += 'Для интеграции нужно зарегистрировать свой токен \n'
+    text += 'Заходи по ссылке и авторизуйся - https://todoist.com/app/today \n'
+    text += 'скрин 1 - сверху справа зайди в интеграции \n'
+    text += 'скрин 2 - в разделе интеграции найди API token - его нужно скопировать и отправить мне (как позже)\n'
+
+    return text
+    
+
+
 #справочная информация
 def start_help(chat_id = None, command = None):
     r = psql_methods.last_state(chat_id,command)
@@ -37,10 +52,16 @@ def main(command = None , chat_id = None , json_update = None, dict_user_data = 
         text = start_help(chat_id = chat_id , command = command)
         reply_markup = meta_info.reply_markup_main
 
+    #список доступных интеграций
+    elif 'integrations' in command:
+        text = integrations(chat_id = chat_id , command = command)
+        reply_markup = meta_info.reply_markup_main
+
     elif 'меню' in command:
         text = menu(chat_id = chat_id , command = command)
         reply_markup = meta_info.reply_markup_main
 
     return text , reply_markup
+
 
 

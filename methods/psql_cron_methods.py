@@ -362,7 +362,8 @@ def prev_month_complete_tasks():
         user_dict_tomorrow_messages = {'user_id' : user_id
                                       ,'chat_id' : chat_id
                                       ,'message' : text
-                                      ,'photo_path' : full_path}
+                                      ,'photo_path' : full_path
+                                      ,'photo_delete' : True}
         #добавляем инфо в общей список сообщений
         list_messages.append(user_dict_tomorrow_messages)
         

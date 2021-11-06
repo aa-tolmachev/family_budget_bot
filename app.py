@@ -99,6 +99,8 @@ def cron_worker_1():
                     if 'photo_path' in message.keys():
                         photo_path = message['photo_path']
                         send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo_path = photo_path)
+                        if message['photo_delete']:
+                            os.remove(photo_path)
         return "!", 200
     except:
         #тест - для тестирования

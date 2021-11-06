@@ -24,7 +24,7 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
 
 
     #массивы значений комманд
-    primary_commands = ['help' , 'меню']
+    primary_commands = ['help' , 'integrations' , 'меню']
     primary_commands = "(.*" + ".*)|(.*".join(primary_commands) + ".*)"
 
     start_commands = ['start' , 'Создать кошелек' ]
