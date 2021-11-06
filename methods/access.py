@@ -1,7 +1,9 @@
+import os
+
 
 #токен бота family_budget
 def token():
-    token = '382244799:AAFfN3evzGDQaRevpW5xqZ1AEovvdRCWk-0'
+    token = os.getenv('TELEGRAM_TOKEN')
     return token
 
 #url телеграма
@@ -20,11 +22,11 @@ def google_maps_api_key():
 
 #heroku PSQL
 def PSQL_heroku_keys():
-	dbname = 'dbr3jigs1op5oo'
+	dbname = os.getenv('HEROKU_PSQL_DBNAME')
 	port = '5432'
-	user = 'muwrkppfuyldmk'
-	host = 'ec2-54-227-252-202.compute-1.amazonaws.com'
-	password = '4c4eabfcaf92f7289ccfc1a314d04a3c3806db72b1bf12fd5f0f40c410b14355'
+	user = os.getenv('HEROKU_PSQL_USER')
+	host = os.getenv('HEROKU_PSQL_HOST')
+	password = os.getenv('HEROKU_PSQL_PASS')
 
 	PSQL_heroku_keys = {'dbname' : dbname
 						, 'port' : port
