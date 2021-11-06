@@ -78,7 +78,11 @@ def main_woker_1( model = None):
         #отчет о делах за предыдущий месяц
         elif model == 'prev_month_complete_tasks':
             r = prev_month_complete_tasks()
-            return r  
+            return r
+        #статус выполнения задач
+        elif model == 'today_complete_tasks':
+            r = today_complete_tasks()
+            return r
 
     return 200
 
@@ -366,4 +370,97 @@ def prev_month_complete_tasks():
     response['system_message'] = 'Have reports'
     response['user_messages'] = list_messages
 
+    return response
+
+
+#статус выполнения задач за сегодня
+def today_complete_tasks():
+
+    #формируем ответ
+    response = {'status' : 200
+                ,'report' : 'today_complete_tasks'
+                ,'message' : 'No reports'
+                ,'tomorrow_messages' : []
+                }
+    #главное меню
+    global g_reply_markup_main
+    reply_markup_main = g_reply_markup_main
+
+
+    #получаем дату в строке завтрашнего дня
+    today_str = today_str_func()
+
+    #получаем дату завтрашнего дня для sql запроса
+    tomorrow_str = tomorrow_str_func()
+
+    # создаем запрос
+    cur = conn.cursor()
+
+    #смотрим, какие задачи были запланированы сегодня
+    cur.execute("SELECT * from public.tasks where date_task = '%(today_str)s'" % {'today_str' : today_str} )
+
+    #получаем данные
+    df_today_tasks = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+
+
+    #делаем задачи выполненными - верим же людям :)
+    cur.execute("update tasks set flg_done = True where date_task = '%(today_str)s'" % {'today_str' : today_str} )
+    conn.commit()
+
+    if df_today_tasks.shape[0] == 0:
+        cur.close()
+        return response
+    else:
+        cur.execute("select id , chat_id from public.user" )
+        df_user = DataFrame(cur.fetchall(), columns=[desc[0] for desc in cur.description])
+        cur.close()
+
+
+    #подгатавливаем лист с сообщениями
+    list_messages = []
+    #делаем выборку из пользователей, по кому нужно направить ответ
+    list_user_id = list(df_today_tasks['user_id'].unique())
+    df_user_id = df_user[df_user.id.isin(list_user_id)][:]
+
+
+    #проходим по ним и заполняем информацию по пользователям
+    for i,row in df_user_id.iterrows():
+        #получаем данные пользователя
+        user_id = row.id
+        chat_id = row.chat_id
+        #получаем сообщения по нему
+        interest_info = df_today_tasks[(df_today_tasks.user_id == user_id)][['task']][:]
+        list_interest_info = list(interest_info.T.to_dict('list').values())
+        
+        text = 'Напоминаю, сегодня были заплонированы дела: \n\n'
+        num = 1
+        for task_plan in list_interest_info:
+            task_name = task_plan[0]
+            text += str(num) + ': ' + task_name + '\n'
+            
+            num += 1
+         
+        text += '\n Надеюсь у тебя все тип-топ, я верю - что они будут выполнены сегодня.' 
+         
+
+        
+        #формируем итоговый словарь по пользователю
+        user_dict_tomorrow_messages = {'user_id' : user_id
+                                      ,'chat_id' : chat_id
+                                      ,'message' : text
+                                      }
+
+        #Перенос неважных дел на завтра
+        markup_non_important_to_tommorow = meta_info.markup_non_important_to_tommorow
+        user_dict_tomorrow_messages['reply_markup'] = markup_non_important_to_tommorow
+
+        #добавляем инфо
+        list_messages.append(user_dict_tomorrow_messages)
+        
+
+    response['system_message'] = 'Have reports'
+    response['user_messages'] = list_messages
+
+
+    #реализовать обработку response в app и отправку сообщений пользователям
     return response

@@ -938,10 +938,17 @@ def move_to_tomorrow(chat_id = None , dict_user_data = None):
         #получаем входные данные
         user_id = dict_user_data['user_id']
         
+        
+        #помечаем их как невыполненные
+        cur.execute("update tasks set flg_done = False where user_id = %(user_id)s and date_task = '%(today_str)s' and flg_main is False" % {'user_id' : user_id  , 'tomorrow_str' : tomorrow_str , 'today_str' : today_str})
+        conn.commit()
+
         #переносим все неважные дела на завтра
         cur.execute("update tasks set date_task = '%(tomorrow_str)s' where user_id = %(user_id)s and date_task = '%(today_str)s' and flg_main is False" % {'user_id' : user_id  , 'tomorrow_str' : tomorrow_str , 'today_str' : today_str})
-
         conn.commit()
+
+
+
         cur.close()
         response['text'] = 'Неважные дела пересены на завтра, расслабтесь сегодня! ' + emoji('руки_вверх') + emoji('руки_вверх') + emoji('руки_вверх')
     except:
