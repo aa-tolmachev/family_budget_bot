@@ -18,9 +18,9 @@ def integrations(chat_id = None, command = None):
     text += 'скрин 2 - в разделе интеграции найди API token - его нужно скопировать и отправить мне (как позже)\n'
 
     full_path = './images/integration_todoist/todoist_1.png'
-    send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo_path = full_path)
+    send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo_path = full_path, photo_delete = False)
     full_path = './images/integration_todoist/todoist_2.png'
-    send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo_path = full_path)
+    send_result = telegram_bot_methods.send_photo(chat_id = chat_id, photo_path = full_path, photo_delete = False)
 
     return text
     

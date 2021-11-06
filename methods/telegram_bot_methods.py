@@ -80,15 +80,16 @@ def send_location(chat_id = None , longitude = None , latitude = None):
 
 #todo переделать под работающие условия
 #функция отправки фото
-def send_photo(chat_id = None, photo_path = None):
+def send_photo(chat_id = None, photo_path = None , photo_delete = True):
     url = api + token + '/sendPhoto'
     
     data = {'chat_id': chat_id}
     files = {'photo': (photo_path, open(photo_path, "rb"))}
 
     requests.post(url, data=data, files=files)
-
-    os.remove(photo_path)
+    
+    if photo_delete:
+        os.remove(photo_path)
 
     send_result = '200'
 
