@@ -432,7 +432,7 @@ def today_complete_tasks():
         interest_info = df_today_tasks[(df_today_tasks.user_id == user_id)][['task']][:]
         list_interest_info = list(interest_info.T.to_dict('list').values())
         
-        text = 'Напоминаю, сегодня были заплонированы дела: \n\n'
+        text = 'Напоминаю ' + emoji('пар из ноздрей') + ', сегодня были заплонированы дела: \n\n'
         num = 1
         for task_plan in list_interest_info:
             task_name = task_plan[0]
@@ -440,7 +440,7 @@ def today_complete_tasks():
             
             num += 1
          
-        text += '\n Надеюсь у тебя все тип-топ, я верю - что они будут выполнены сегодня.' 
+        text += '\nНадеюсь у тебя все тип-топ, я верю - что они будут выполнены сегодня. ' + emoji('фиолетовый дьяволенок') + emoji('фиолетовый дьяволенок')
          
 
         
