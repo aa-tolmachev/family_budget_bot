@@ -1,5 +1,5 @@
 import requests
-import access
+from methods import access
 import json
 from datetime import datetime
 from time import sleep
