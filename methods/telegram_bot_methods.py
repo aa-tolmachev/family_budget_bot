@@ -1,5 +1,5 @@
 import requests
-from methods import access
+import access
 import json
 from datetime import datetime
 from time import sleep
@@ -41,8 +41,8 @@ def get_message():
 #функция отправки одного сообщения
 def send_message(chat_id = None , text = '/help -> список возможных команд' , reply_markup = None):
     url = api + token + '/sendMessage'
-    #print(url)
-
+    print(url)
+    
     #если не направляем кнопки
     if reply_markup is None:
         params = {'chat_id' : chat_id

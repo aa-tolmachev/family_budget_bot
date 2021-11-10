@@ -1,5 +1,5 @@
 import requests
-from methods import access
+import access
 from methods.emoji import emoji
 import json
 from datetime import datetime
