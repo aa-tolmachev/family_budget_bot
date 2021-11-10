@@ -56,6 +56,8 @@ def send_message(chat_id = None , text = '/help -> список возможны
     r = requests.post(url,
                       json=params)
 
+    print(r.status_code)
+    print(r.text)
     send_result = '200'
 
     return send_result
