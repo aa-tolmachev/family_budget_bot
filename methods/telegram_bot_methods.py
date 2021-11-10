@@ -41,6 +41,7 @@ def get_message():
 #функция отправки одного сообщения
 def send_message(chat_id = None , text = '/help -> список возможных команд' , reply_markup = None):
     url = api + token + '/sendMessage'
+    print(url)
     
     #если не направляем кнопки
     if reply_markup is None:
