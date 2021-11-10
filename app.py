@@ -48,7 +48,7 @@ def webhook():
     r = requests.post(url,
                       json=params)
 
-    print(r.code)
+    print(r.status_code)
     print(r.text)
     return "!", 200
 
