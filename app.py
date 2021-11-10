@@ -43,6 +43,8 @@ g_reply_markup_main = meta_info.reply_markup_main
 @application.route("/set_webhook")
 def webhook():
     url = api + token + '/setWebhook'
+    print(url)
+    
     params = {'url' : 'https://fin-budg-bot.herokuapp.com/main'
     }
     r = requests.post(url,
