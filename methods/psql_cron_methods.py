@@ -30,7 +30,7 @@ d_google_maps_api = access.google_maps_api_key()
 PSQL_heroku_keys = access.PSQL_heroku_keys()
 
 #создаем подключение к PSQL
-#conn = psycopg2.connect("dbname='%(dbname)s' port='%(port)s' user='%(user)s' host='%(host)s' password='%(password)s'" % PSQL_heroku_keys)
+conn = psycopg2.connect("dbname='%(dbname)s' port='%(port)s' user='%(user)s' host='%(host)s' password='%(password)s'" % PSQL_heroku_keys)
 
 
 
