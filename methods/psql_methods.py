@@ -959,3 +959,33 @@ def move_to_tomorrow(chat_id = None , dict_user_data = None):
     return response
 
 
+
+
+#запись информации по токену для todoist
+def add_external_app(chat_id = None  , external_app = None , external_app_token = None , dict_user_data = None):
+    
+    user_id = dict_user_data['user_id']
+
+    # создаем запрос
+    cur = conn.cursor()
+    #проверяем, что пользователя ранее не было
+    cur.execute("SELECT * from public.external_token where user_id = %(user_id)s and external_app = '%(external_app)s'" % {'user_id' : user_id , 'external_app':external_app} )
+    #получаем время записи
+    now = datetime.now()
+    message_at = now_str()
+    #если запись есть - обновляем токен
+    if cur.statusmessage[-3:] != 'T 0':
+        #обновляем токен
+        cur.execute("UPDATE public.external_token  SET external_app_token = '%(external_app_token)s' , date_update = '%(message_at)s' WHERE user_id  = %(user_id)s and external_app = '%(external_app)s'" % {'external_app_token' : external_app_token, 'user_id' : user_id , 'message_at':message_at , 'external_app':external_app}  )
+        conn.commit()
+    #есле ранее не было такого аппа у пользователя или пользователя вообще то записываем
+    else:
+        cur.execute("INSERT INTO public.external_token (user_id , external_app,external_app_token,date_update)  VALUES (%(user_id)s, '%(external_app)s','%(external_app_token)s','%(message_at)s')" % {'external_app_token' : external_app_token, 'user_id' : user_id , 'message_at':message_at , 'external_app':external_app}  )
+        conn.commit()
+
+
+
+    cur.close()
+
+    return '200'
+

@@ -24,13 +24,16 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
 
 
     #массивы значений комманд
-    primary_commands = ['help' , 'integrations' , 'меню']
+    primary_commands = ['help'  , 'меню']
     primary_commands = "(.*" + ".*)|(.*".join(primary_commands) + ".*)"
 
     start_commands = ['start' , 'Создать кошелек' ]
     start_commands = "(.*" + ".*)|(.*".join(start_commands) + ".*)"
 
+    integration_commands = ['integrations']
+
     #массивы значений последних состояний
+    integration_last_states = ['integrations']
     wallet_last_states = ['Кошелек', 'Траты факт - добавить', 'Траты план - добавить', 'Траты план - список']
     report_last_states = ['Отчеты']
     invest_last_states = []
@@ -40,6 +43,10 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
     #определяем первоочередные команды из любого места
     if re.match(primary_commands, command):
         meta_path = 'primary'
+
+    #определяем интеграции
+    elif 'integrations' in command or last_state in integration_last_states:
+        meta_path = 'integration'
 
     #определяем стартовые команды команды из любого места
     elif re.match(start_commands, command):
@@ -82,6 +89,8 @@ def make_dialog_branch(meta_path= None, chat_id= None, command= None , dict_user
         text , reply_markup = dibr.start.main(command = command , chat_id = chat_id , json_update = json_update , dict_user_data =dict_user_data)
     elif meta_path == 'primary':
         text , reply_markup = dibr.primary.main(command = command , chat_id = chat_id , json_update = json_update , dict_user_data = dict_user_data)
+    elif meta_path == 'integration':
+        text , reply_markup = dibr.integration.main(command = command , chat_id = chat_id , json_update = json_update , dict_user_data = dict_user_data)
     elif meta_path == 'wallet':
         text , reply_markup = dibr.wallet.main(command = command , chat_id = chat_id , json_update = json_update, dict_user_data = dict_user_data)
     elif meta_path == 'report':
