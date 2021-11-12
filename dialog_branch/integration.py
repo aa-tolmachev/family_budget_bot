@@ -33,7 +33,7 @@ def main(command = None , chat_id = None, dict_user_data = None,json_update = No
         reply_markup = {'keyboard': [['ToDoist'],['меню']], 'resize_keyboard': True, 'one_time_keyboard': False}
 
     #5-> начало работы с интеграциями
-    elif last_state == 'integrations':
+    elif last_state == '/integrations':
         #5->1 выбрал ToDoist
         if command == 'ToDoist':
             r = psql_methods.insert_state_info(chat_id = chat_id , state_info = command , state_id = 1)
