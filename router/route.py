@@ -33,7 +33,7 @@ def meta(chat_id = None , command = None ,dict_user_data= None):
     integration_commands = ['integrations']
 
     #массивы значений последних состояний
-    integration_last_states = ['integrations']
+    integration_last_states = ['/integrations']
     wallet_last_states = ['Кошелек', 'Траты факт - добавить', 'Траты план - добавить', 'Траты план - список']
     report_last_states = ['Отчеты']
     invest_last_states = []
