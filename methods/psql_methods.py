@@ -845,9 +845,13 @@ def add_task(chat_id = None  , date_plan = None , dict_user_data = None):
         #проверяем, важность этого дела, если первый символ без пробела '!' значит дело важное, иначе нет
         is_main_task = task_name.replace(' ','')[0] == "!"
 
+        #стандартный ответ
+        response['text'] = 'Записано! Я напомню Вам о данном деле, можете не переживать.'
+
         #проверяем если задача сегодня
         if date_plan == 'сегодня':
             date_plan = today_str_func()
+            response['text'] = 'Оки-доки - не забудь сегодня только сделать ' + emoji('смайл_прищур') 
 
         #получаем время записи
         #если дело важное записываем флаг flg_main = True иначе flg_main = False
@@ -857,7 +861,7 @@ def add_task(chat_id = None  , date_plan = None , dict_user_data = None):
             cur.execute("INSERT INTO public.tasks (user_id ,task , date_task , flg_done, flg_main) VALUES (%(user_id)s,'%(task_name)s','%(date_plan)s',False,False)" % {'user_id' : user_id , 'task_name' : task_name , 'date_plan' : date_plan }  )
         conn.commit()
         cur.close()
-        response['text'] = 'Записано! Я напомню Вам о данном деле, можете не переживать.'
+        
     except:
         cur.close()
         response['text'] = 'Что-то пошло не так, не получилось записать...'
