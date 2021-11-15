@@ -845,6 +845,10 @@ def add_task(chat_id = None  , date_plan = None , dict_user_data = None):
         #проверяем, важность этого дела, если первый символ без пробела '!' значит дело важное, иначе нет
         is_main_task = task_name.replace(' ','')[0] == "!"
 
+        #проверяем если задача сегодня
+        if date_plan == 'сегодня':
+            date_plan = today_str_func()
+
         #получаем время записи
         #если дело важное записываем флаг flg_main = True иначе flg_main = False
         if is_main_task:
