@@ -1,4 +1,4 @@
-# Family Budget Bot
+# Family Budget Bot v2
 
 Телеграм бот для работы с персональной помощью
 
