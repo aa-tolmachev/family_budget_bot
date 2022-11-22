@@ -45,7 +45,7 @@ def webhook():
     url = api + token + '/setWebhook'
     print(url)
     
-    params = {'url' : 'https://fin-budg-bot.herokuapp.com/main'
+    params = {'url' : 'https://finbudget-bot.herokuapp.com/main'
     }
     r = requests.post(url,
                       json=params)
