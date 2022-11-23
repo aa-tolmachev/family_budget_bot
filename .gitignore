@@ -1,5 +1,6 @@
 #python
 *.ipynb
+FlastTest.ipynb
 .ipynb_checkpoints/
 __pycache__/
 /sublime_project
