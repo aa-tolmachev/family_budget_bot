@@ -56,10 +56,23 @@ def new_user(chat_id = None , json_update = None):
         cur.execute("INSERT INTO public.state (chat_id , current_state)  VALUES (%(chat_id)s, '/start')" % {'chat_id' : chat_id} )
         conn.commit()
 
+        #собираем данные от телеграмма
+        if 'first_name' in json_update['message']['chat']:
+            first_name = json_update['message']['chat']['first_name']
+        else:
+            first_name = None
+            
+        if 'last_name' in json_update['message']['chat']:
+            last_name = json_update['message']['chat']['last_name']
+        else:
+            last_name = None
+
+        if 'username' in json_update['message']['chat']:
+            telegram_username = json_update['message']['chat']['username']
+        else:
+            telegram_username = None
+        
         #регистрируем пользователя
-        first_name = json_update['message']['chat']['first_name']
-        last_name = json_update['message']['chat']['last_name']
-        telegram_username = json_update['message']['chat']['username']
         now = datetime.now()
         created_at = now_str()
         last_message_at = created_at
