@@ -59,10 +59,11 @@ def new_user(chat_id = None , json_update = None):
         #регистрируем пользователя
         first_name = json_update['message']['chat']['first_name']
         last_name = json_update['message']['chat']['last_name']
+        telegram_username = json_update['message']['chat']['username']
         now = datetime.now()
         created_at = now_str()
         last_message_at = created_at
-        cur.execute("INSERT INTO public.user (chat_id,first_name,last_name,created_at,last_message_at)  VALUES (%(chat_id)s, '%(first_name)s','%(last_name)s','%(created_at)s','%(last_message_at)s')" % {'chat_id' : chat_id , 'first_name' : first_name , 'last_name' : last_name , 'created_at' : created_at , 'last_message_at' : last_message_at} )
+        cur.execute("INSERT INTO public.user (chat_id,first_name,last_name,created_at,last_message_at,telegram_username)  VALUES (%(chat_id)s, '%(first_name)s','%(last_name)s','%(created_at)s','%(last_message_at)s', '%(telegram_username)s')" % {'chat_id' : chat_id , 'first_name' : first_name , 'last_name' : last_name , 'created_at' : created_at , 'last_message_at' : last_message_at, 'telegram_username' : telegram_username} )
         conn.commit()
     cur.close()
 
