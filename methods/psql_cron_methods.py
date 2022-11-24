@@ -10,6 +10,7 @@ import psycopg2
 from pandas import DataFrame
 import pandas as pd
 import numpy as np
+import random
 
 import matplotlib
 matplotlib.use('Agg')
@@ -184,6 +185,8 @@ def today_tasks():
     global g_reply_markup_main
     reply_markup_main = g_reply_markup_main
 
+    #список подбадривающих фраз на день
+    today_tasks_lucky_day_arr = dict_dates.today_tasks_lucky_day_arr
 
     #получаем дату в строке завтрашнего дня
     today_str = today_str_func()
@@ -246,10 +249,10 @@ def today_tasks():
                 text += '\n Уверены в своих силах? В среднем вы делаете в день задач около {0}, подумайте, может перенесем что-нибудь на другой день?'.format(avg_tasks_in_day)
                 update_task_dates = True
             else:
-                text += '\n Удачи в сегодняшнем дне, ковбой!'  
+                text += random.choice(today_tasks_lucky_day_arr)  
 
         else:
-            text += '\n Удачи в сегодняшнем дне, ковбой!'  
+            text += random.choice(today_tasks_lucky_day_arr)
         
 
         
